@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "md2gost"
+version = "0.1.0"
+description = ""
+authors = ["witelokk <death.thunder@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tools.poetry.scripts]
+md2gost = "md2gost.__main__.main"
