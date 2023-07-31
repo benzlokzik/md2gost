@@ -13,8 +13,10 @@ class Renderer:
 
     def __init__(self, document: Document):
         self._document: Document = document
-        self._max_height = document.sections[0].page_height - document.sections[0].top_margin - Cm(2)  # todo add bottom margin detection with footer
-        self._layout_tracker = LayoutTracker(self._max_height)
+        max_height = document.sections[0].page_height - document.sections[0].top_margin - Cm(2)  # todo add bottom margin detection with footer
+        max_width = self._document.sections[0].page_width - self._document.sections[0].top_margin\
+            - self._document.sections[0].bottom_margin
+        self._layout_tracker = LayoutTracker(max_height, max_width)
 
     def process(self, renderables: list[Renderable]):
         # add page numbering to the footer
@@ -25,13 +27,9 @@ class Renderer:
             "w:instr": "PAGE \\* MERGEFORMAT"
         }))
 
-        max_width = self._document.sections[0].page_width - self._document.sections[0].top_margin\
-            - self._document.sections[0].bottom_margin
-
         previous_rendered: RenderedInfo | None = None
         for i in range(len(renderables)):
-            infos = renderables[i].render(previous_rendered, self._layout_tracker.current_page_height,
-                                          self._max_height, max_width)
+            infos = renderables[i].render(previous_rendered, self._layout_tracker.current_state)
 
             for info in infos:
                 self._add(info.docx_element, info.height)

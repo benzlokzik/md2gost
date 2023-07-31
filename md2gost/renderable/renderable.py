@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 
 from docx.shared import Length
 
+from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
 
 
 class Renderable(ABC):
     @abstractmethod
-    def render(self, previous_rendered: RenderedInfo, current_page_height: Length, max_height: Length,
-               max_width: Length) -> Generator[RenderedInfo, None, None]:
+    def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         """Renders the object to one or multiple Parented objects"""
