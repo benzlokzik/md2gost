@@ -7,6 +7,9 @@ class LayoutState:
         self._max_width: Length = max_width
         self._current_height: Length = Length(0)
 
+    def _new_page(self):
+        self._current_height += self.remaining_page_height
+
     @property
     def max_height(self):
         return self._max_height
@@ -20,7 +23,7 @@ class LayoutState:
         return self._current_height % self._max_height
 
     @property
-    def _remaining_page_height(self) -> Length:
+    def remaining_page_height(self) -> Length:
         return self._max_height - self.current_page_height
 
     @property
@@ -40,7 +43,7 @@ class LayoutTracker:
         self._state._current_height += height
 
     def can_fit_to_page(self, height: Length):
-        return height <= self._state._remaining_page_height
+        return height <= self._state.remaining_page_height
 
     def new_page(self):
-        self._state._current_height += self._state._remaining_page_height
+        self._state._new_page()
