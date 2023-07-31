@@ -5,9 +5,9 @@ name: Python application
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "actions-test" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "actions-test" ]
 
 permissions:
   contents: read
@@ -19,12 +19,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - name: Set up Python 3.10
+    - name: Set up Python 3.11
       uses: actions/setup-python@v3
       with:
-        python-version: "3.10"
+        python-version: "3.11"
     - name: Install dependencies
       run: |
+        echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
+        sudo apt-get install ttf-mscorefonts-installer
+        sudo apt-get install fontforge
+        sudo apt-get install cabextract
+        wget https://gist.githubusercontent.com/maxwelleite/10774746/raw/ttf-vista-fonts-installer.sh -q -O - | sudo bash
         python -m pip install --upgrade pip
         pip install flake8 pytest
         pip install .
