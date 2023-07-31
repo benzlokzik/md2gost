@@ -120,6 +120,8 @@ class ParagraphSizer:
         lines = 1
         line_width = first_line_intent
 
+        space_width = Font(font.name, font.bold, font.italic, font.size.pt).get_text_width(" ")*0.85
+
         for run in self.paragraph.runs:
             run_docx_font = _merge_objects(
                 font,
@@ -127,8 +129,8 @@ class ParagraphSizer:
             )
             font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
             for word in run.text.split(" "):
-                word_size = font.get_text_width(word)
-                if line_width + word_size < max_width:
+                word_size = font.get_text_width(word)+space_width
+                if line_width + word_size - space_width < max_width:
                     line_width += word_size
                 else:
                     line_width = word_size
