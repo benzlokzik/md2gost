@@ -55,7 +55,7 @@ class Font:
 
     def get_text_width(self, text: str) -> Length:
         bbox = self._draw.textbbox((0, 0), text, self._freetypefont)
-        width = (bbox[2] - bbox[0]) * Length._EMUS_PER_PT * 1.09
+        width = (bbox[2] - bbox[0]) * Length._EMUS_PER_PT
         return Length(width)
 
     def get_line_height(self):

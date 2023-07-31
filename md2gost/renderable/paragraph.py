@@ -36,7 +36,7 @@ class Paragraph(Renderable):
                       if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph) else None,
                       layout_state.max_width).calculate_height()
 
-        if layout_state.current_page_height == 0 and layout_state.page == 1:
+        if layout_state.current_page_height == 0 and layout_state.page > 1:
             height_data.before = 0
 
         if layout_state.current_page_height + height_data.before + height_data.base <= layout_state.max_height <\
