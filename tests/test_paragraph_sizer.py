@@ -41,5 +41,5 @@ class TestFont(unittest.case.TestCase):
         self.assertEqual(24, font.get_line_height() // _EMUS_PER_PX)
 
     def test_get_line_height_consolas(self):
-        font = Font("Open Sans", False, False, 20)
+        font = Font("Consolas", False, False, 20)
         self.assertEqual(32, font.get_line_height() // _EMUS_PER_PX)

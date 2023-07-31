@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from functools import cached_property
 
 from freetype import Face
@@ -61,6 +62,23 @@ class Font:
         return Pt(self._face.size.height / 64)
 
 
+@dataclass
+class ParagraphSizerResult:
+    before: Length
+    lines: int
+    line_height: Length
+    line_spacing: float
+    after: Length
+
+    @property
+    def base(self) -> Length:
+        return Length((self.lines - 1) * self.line_spacing + 1) * self.line_height
+
+    @property
+    def full(self) -> Length:
+        return Length(self.before + self.line_height * self.line_spacing * self.lines + self.after)
+
+
 class ParagraphSizer:
     def __init__(self, paragraph: Paragraph, previous_paragraph: Paragraph | None, max_width: Length):
         self.previous_paragraph = previous_paragraph
@@ -101,7 +119,7 @@ class ParagraphSizer:
                 break
         return contextual_spacing
 
-    def calculate_height(self) -> tuple[Length, Length, Length]:
+    def calculate_height(self) -> ParagraphSizerResult:
         max_width = self.max_width
 
         lines = 1
@@ -135,9 +153,6 @@ class ParagraphSizer:
 
         font = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt)
 
-        height = font.get_line_height() \
-            * lines * paragraph_format.line_spacing
-
         previous_paragraph_format: ParagraphFormat = None
         if self.previous_paragraph:
             previous_paragraph_styles = [self.previous_paragraph.style]
@@ -161,4 +176,4 @@ class ParagraphSizer:
 
         after = (paragraph_format.space_after or 0)
 
-        return before, height, after
+        return ParagraphSizerResult(before, lines, font.get_line_height(), paragraph_format.line_spacing, after)
