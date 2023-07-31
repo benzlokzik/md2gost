@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from functools import cached_property
 
+from docx.text.run import Run
 from freetype import Face
 
 from docx.text.paragraph import Paragraph
@@ -12,10 +13,6 @@ from docx.styles.style import _ParagraphStyle
 from PIL import Image, ImageDraw, ImageFont
 
 from .find_font import find_font
-
-
-_EMUS_PER_PX = 9557.522123893805
-# _EMUS_PER_PX = 9525
 
 
 def _merge_objects(*objects):
@@ -119,10 +116,29 @@ class ParagraphSizer:
                 break
         return contextual_spacing
 
+    def count_lines(self, runs: list[Run], max_width: Length, font: DocxFont, first_line_intent: Length):
+        lines = 1
+        line_width = first_line_intent
+
+        for run in self.paragraph.runs:
+            run_docx_font = _merge_objects(
+                font,
+                run.font
+            )
+            font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
+            for word in run.text.split(" "):
+                word_size = font.get_text_width(word)
+                if line_width + word_size < max_width:
+                    line_width += word_size
+                else:
+                    line_width = word_size
+                    lines += 1
+
+        return lines
+
     def calculate_height(self) -> ParagraphSizerResult:
         max_width = self.max_width
 
-        lines = 1
 
         docx_font: DocxFont = _merge_objects(
             *[style.font for style in self._styles[::-1] if style.font],
@@ -136,20 +152,8 @@ class ParagraphSizer:
 
         max_width -= (paragraph_format.left_indent or 0) + \
             (paragraph_format.right_indent or 0)
-        line_width = paragraph_format.first_line_indent or 0
-        for run in self.paragraph.runs:
-            run_docx_font = _merge_objects(
-                docx_font,
-                run.font
-            )
-            font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
-            for word in run.text.split(" "):
-                word_size = font.get_text_width(word)
-                if line_width + word_size < max_width:
-                    line_width += word_size
-                else:
-                    line_width = word_size
-                    lines += 1
+
+        lines = self.count_lines(self.paragraph.runs, max_width, docx_font, paragraph_format.first_line_indent or 0)
 
         font = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt)
 
