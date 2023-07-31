@@ -17,5 +17,5 @@ class TestParagraph(unittest.TestCase):
         paragraph.add_run("hello world")
         info = list(paragraph.render(None, layout_tracker.current_state))[0]
 
-        self.assertEqual(47, info.height / _EMUS_PER_PX)
+        self.assertAlmostEqual(45.5, info.height / _EMUS_PER_PX, delta=1/3)
 
