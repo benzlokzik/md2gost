@@ -1,6 +1,9 @@
+import logging
+import os
 from dataclasses import dataclass
 from functools import cached_property
 
+from docx.enum.text import WD_LINE_SPACING
 from docx.text.run import Run
 from freetype import Face
 
@@ -56,7 +59,7 @@ class Font:
         return Length(width)
 
     def get_line_height(self):
-        return Pt(self._face.size.height / 64)
+        return Pt((self._face.size.height-24) / 64)
 
 
 @dataclass
@@ -116,15 +119,15 @@ class ParagraphSizer:
                 break
         return contextual_spacing
 
-    def count_lines(self, runs: list[Run], max_width: Length, font: DocxFont, first_line_intent: Length):
+    def count_lines(self, runs: list[Run], max_width: Length, docx_font: DocxFont, first_line_intent: Length):
         lines = 1
         line_width = first_line_intent
 
-        space_width = Font(font.name, font.bold, font.italic, font.size.pt).get_text_width(" ")*0.85
+        space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")*0.93
 
-        for run in self.paragraph.runs:
+        for run in runs:
             run_docx_font = _merge_objects(
-                font,
+                docx_font,
                 run.font
             )
             font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
@@ -182,4 +185,11 @@ class ParagraphSizer:
 
         after = (paragraph_format.space_after or 0)
 
-        return ParagraphSizerResult(before, lines, font.get_line_height(), paragraph_format.line_spacing, after)
+        line_height = font.get_line_height()
+        line_spacing = paragraph_format.line_spacing
+        if paragraph_format.line_spacing_rule == WD_LINE_SPACING.EXACTLY:
+            line_spacing /= line_height
+        elif paragraph_format.line_spacing_rule == WD_LINE_SPACING.AT_LEAST:
+            raise NotImplementedError("Line spacing rule AT_LEAST is not supported")
+
+        return ParagraphSizerResult(before, lines, line_height, line_spacing, after)

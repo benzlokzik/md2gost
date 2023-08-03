@@ -10,7 +10,7 @@ from . import extended_markdown
 class RenderableFactory:
     @singledispatchmethod
     @staticmethod
-    def create(marko_element: extended_markdown.InlineElement | extended_markdown.BlockElement, parent: Parented) \
+    def create(marko_element: extended_markdown.BlockElement, parent: Parented) \
             -> Renderable:
         paragraph = Paragraph(parent)
         paragraph.add_run(f"{marko_element.get_type()} is not supported", color=RGBColor.from_string('ff0000'))
@@ -28,7 +28,7 @@ class RenderableFactory:
             elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis)):
                 RenderableFactory._create_runs(paragraph, child.children, classes+[type(child)])
             else:
-                paragraph.add_run(f"{child.get_type()} is not supported", color=RGBColor.from_string("FF0000"))
+                paragraph.add_run(f" {child.get_type()} is not supported ", color=RGBColor.from_string("FF0000"))
 
     @create.register
     @staticmethod
@@ -36,3 +36,11 @@ class RenderableFactory:
         paragraph = Paragraph(parent)
         RenderableFactory._create_runs(paragraph, marko_paragraph.children)
         return paragraph
+
+
+    @create.register
+    @staticmethod
+    def _(marko_code_block: extended_markdown.FencedCode | extended_markdown.CodeBlock, parent: Parented):
+        listing = Listing(parent)
+        listing.set_text(marko_code_block.children[0].children)
+        return listing

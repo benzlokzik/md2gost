@@ -52,6 +52,10 @@ class TestFont(unittest.case.TestCase):
         font = Font("Consolas", False, False, 20)
         self.assertAlmostEqual(31, font.get_line_height() / _EMUS_PER_PX, delta=delta)
 
+    def test_get_line_height_courier(self):
+        font = Font("Courier New", False, False, 12)
+        self.assertAlmostEqual(18.3, font.get_line_height() / _EMUS_PER_PX, delta=delta)
+
 
 class TestParagraphSizer(unittest.TestCase):
     def setUp(self):

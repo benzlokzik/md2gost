@@ -3,6 +3,7 @@ from dataclasses import dataclass
 
 from docx.shared import Length, Parented, RGBColor
 from docx.text.paragraph import Paragraph as DocxParagraph
+from docx.enum.text import WD_LINE_SPACING
 
 from . import Renderable
 from .paragraph_sizer import ParagraphSizer
@@ -22,6 +23,7 @@ class Run:
 class Paragraph(Renderable):
     def __init__(self, parent: Parented):
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
+        self._was_rendered = False
 
     def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None):
         docx_run = self._docx_paragraph.add_run(text)
@@ -29,12 +31,34 @@ class Paragraph(Renderable):
         docx_run.italic = is_italic
         docx_run.font.color.rgb = color
 
+    @property
+    def style(self):
+        return self._docx_paragraph.style
+
+    @style.setter
+    def style(self, value: str):
+        self._docx_paragraph.style = value
+
+    @property
+    def first_line_indent(self):
+        return self._docx_paragraph.paragraph_format.first_line_indent
+
+    @first_line_indent.setter
+    def first_line_indent(self, value: Length):
+        self._docx_paragraph.paragraph_format.first_line_indent = value
+
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         height_data = ParagraphSizer(
             self._docx_paragraph,
             previous_rendered.docx_element
                       if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph) else None,
                       layout_state.max_width).calculate_height()
+
+        # ensure line height, should be removed in the future, when measuring line_height is fixed
+        if not self._was_rendered:
+            self._docx_paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
+            self._docx_paragraph.paragraph_format.line_spacing = Length(height_data.line_height * height_data.line_spacing)
+            self._was_rendered = True
 
         if layout_state.current_page_height == 0 and layout_state.page > 1:
             height_data.before = 0

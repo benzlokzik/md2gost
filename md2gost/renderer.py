@@ -1,5 +1,5 @@
 from docx.document import Document
-from docx.shared import Length, Cm, Parented
+from docx.shared import Length, Cm, Parented, Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 from .renderable import Renderable
@@ -13,7 +13,7 @@ class Renderer:
 
     def __init__(self, document: Document):
         self._document: Document = document
-        max_height = document.sections[0].page_height - document.sections[0].top_margin - Cm(2)  # todo add bottom margin detection with footer
+        max_height = document.sections[0].page_height - document.sections[0].top_margin - Pt(36+15.6)  # todo add bottom margin detection with footer
         max_width = self._document.sections[0].page_width - self._document.sections[0].top_margin\
             - self._document.sections[0].bottom_margin
         self._layout_tracker = LayoutTracker(max_height, max_width)

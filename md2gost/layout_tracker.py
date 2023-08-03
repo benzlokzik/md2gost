@@ -1,34 +1,31 @@
+from copy import copy
+
 from docx.shared import Length
 
 
 class LayoutState:
     def __init__(self, max_height: Length, max_width: Length):
-        self._max_height: Length = max_height
-        self._max_width: Length = max_width
+        self.max_height: Length = max_height
+        self.max_width: Length = max_width
         self._current_height: Length = Length(0)
 
-    def _new_page(self):
+    def new_page(self):
         self._current_height += self.remaining_page_height
 
     @property
-    def max_height(self):
-        return self._max_height
-
-    @property
-    def max_width(self):
-        return self._max_width
-
-    @property
     def current_page_height(self):
-        return self._current_height % self._max_height
+        return self._current_height % self.max_height
 
     @property
     def remaining_page_height(self) -> Length:
-        return self._max_height - self.current_page_height
+        return self.max_height - self.current_page_height
 
     @property
     def page(self):
-        return self._current_height // self._max_height + 1
+        return self._current_height // self.max_height + 1
+
+    def add_height(self, height: Length):
+        self._current_height += height
 
 
 class LayoutTracker:
@@ -37,13 +34,13 @@ class LayoutTracker:
 
     @property
     def current_state(self):
-        return self._state
+        return copy(self._state)
 
     def add_height(self, height: Length):
-        self._state._current_height += height
+        self._state.add_height(height)
 
     def can_fit_to_page(self, height: Length):
         return height <= self._state.remaining_page_height
 
     def new_page(self):
-        self._state._new_page()
+        self._state.new_page()
