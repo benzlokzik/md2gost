@@ -56,6 +56,14 @@ class TestFont(unittest.case.TestCase):
         font = Font("Courier New", False, False, 12)
         self.assertAlmostEqual(18.3, font.get_line_height() / _EMUS_PER_PX, delta=delta)
 
+    def test_is_mono_courier(self):
+        font = Font("Courier New", False, False, 12)
+        self.assertTrue(font.is_mono)
+
+    def test_is_mono_times(self):
+        font = Font("Times New Roman", False, False, 12)
+        self.assertFalse(font.is_mono)
+
 
 class TestParagraphSizer(unittest.TestCase):
     def setUp(self):

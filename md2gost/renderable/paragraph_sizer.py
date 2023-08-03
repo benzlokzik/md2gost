@@ -61,6 +61,14 @@ class Font:
     def get_line_height(self):
         return Pt((self._face.size.height-24) / 64)
 
+    @cached_property
+    def is_mono(self):
+        self._face.load_char("i")
+        i_width = self._face.glyph.advance.x
+        self._face.load_char("m")
+        return i_width == self._face.glyph.advance.x
+        # return self._face.glyph.bitmap.width
+
 
 @dataclass
 class ParagraphSizerResult:
