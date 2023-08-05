@@ -47,10 +47,10 @@ class Listing(Renderable):
             paragraph_rendered_info = next(paragraph.render(previous, layout_state))
 
             if paragraph_rendered_info.height > layout_state.remaining_page_height:  # todo add before after
-                table_height = 0
-
                 table_rendered_info = RenderedInfo(table, False, table_height)
                 yield table_rendered_info
+
+                table_height = 0
 
                 continuation_paragraph = Paragraph(self.parent)
                 continuation_paragraph.add_run("Продолжение листинга")
@@ -83,4 +83,4 @@ class Listing(Renderable):
 
             previous = paragraph_rendered_info
 
-        yield RenderedInfo(table, False, table_height + layout_state.remaining_page_height)
+        yield RenderedInfo(table, False, table_height)

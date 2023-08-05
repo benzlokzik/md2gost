@@ -2,6 +2,7 @@ import logging
 import os
 from dataclasses import dataclass
 from functools import cached_property
+from math import ceil
 
 from docx.enum.text import WD_LINE_SPACING
 from docx.text.run import Run
@@ -54,9 +55,12 @@ class Font:
         self._face.set_char_size(int(size_pt * 64))
 
     def get_text_width(self, text: str) -> Length:
-        bbox = self._draw.textbbox((0, 0), text, self._freetypefont)
-        width = (bbox[2] - bbox[0]) * Length._EMUS_PER_PT
-        return Length(width)
+        if not self.is_mono:
+            bbox = self._draw.textbbox((0, 0), text, self._freetypefont)
+            width = (bbox[2] - bbox[0]) * Length._EMUS_PER_PT
+            return Length(width)
+        else:
+            return Pt(len(text) * self._face.glyph.advance.x / 64)
 
     def get_line_height(self):
         return Pt((self._face.size.height-24) / 64)
@@ -127,11 +131,12 @@ class ParagraphSizer:
                 break
         return contextual_spacing
 
-    def count_lines(self, runs: list[Run], max_width: Length, docx_font: DocxFont, first_line_intent: Length):
+    def count_lines(self, runs: list[Run], max_width: Length, docx_font: DocxFont, first_line_indent: Length, is_mono: bool = False):
         lines = 1
-        line_width = first_line_intent
+        line_width = first_line_indent
 
-        space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")*0.93
+        space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")\
+                      *(0.5 if not is_mono else 1)
 
         for run in runs:
             run_docx_font = _merge_objects(
@@ -142,11 +147,18 @@ class ParagraphSizer:
             for word in run.text.split(" "):
                 word_size = font.get_text_width(word)+space_width
                 if line_width + word_size - space_width < max_width:
-                    line_width += word_size
+                    line_width += word_size + space_width
                 else:
-                    line_width = word_size
-                    lines += 1
-
+                    if word_size > max_width:
+                        if lines == 1 and line_width == first_line_indent:
+                            line_width = (word_size - (max_width - line_width)) % max_width
+                            lines += ceil((word_size - (max_width - line_width)) / max_width)
+                        else:
+                            line_width = word_size % max_width
+                            lines += ceil(word_size / max_width)
+                    else:
+                        line_width = word_size
+                        lines += 1
         return lines
 
     def calculate_height(self) -> ParagraphSizerResult:
@@ -166,9 +178,10 @@ class ParagraphSizer:
         max_width -= (paragraph_format.left_indent or 0) + \
             (paragraph_format.right_indent or 0)
 
-        lines = self.count_lines(self.paragraph.runs, max_width, docx_font, paragraph_format.first_line_indent or 0)
-
         font = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt)
+
+        lines = self.count_lines(self.paragraph.runs, max_width, docx_font, paragraph_format.first_line_indent or 0,
+                                 font.is_mono)
 
         previous_paragraph_format: ParagraphFormat = None
         if self.previous_paragraph:

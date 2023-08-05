@@ -113,3 +113,19 @@ class TestParagraphSizer(unittest.TestCase):
         ps = ParagraphSizer(paragraph, None, self._max_width)
 
         self.assertEqual(7, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
+    def test_count_lines_long_word(self):
+        paragraph = self._document.add_paragraph()
+        paragraph.add_run("verylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongword")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width)
+
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
+    def test_count_lines_long_word_2(self):
+        paragraph = self._document.add_paragraph()
+        paragraph.add_run("someword verylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongwordverylongword")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width)
+
+        self.assertEqual(4, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
