@@ -5,6 +5,7 @@ from docx.shared import Parented, RGBColor
 from .renderable import *
 from .renderable import Renderable
 from . import extended_markdown
+from .renderable.heading import Heading
 
 
 class RenderableFactory:
@@ -23,8 +24,8 @@ class RenderableFactory:
         for child in children:
             if isinstance(child, extended_markdown.RawText):
                 paragraph.add_run(child.children,
-                                  extended_markdown.StrongEmphasis in classes,
-                                  extended_markdown.Emphasis in classes)
+                                  extended_markdown.StrongEmphasis in classes or None,
+                                  extended_markdown.Emphasis in classes or None)
             elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis)):
                 RenderableFactory._create_runs(paragraph, child.children, classes+[type(child)])
             else:
@@ -37,6 +38,12 @@ class RenderableFactory:
         RenderableFactory._create_runs(paragraph, marko_paragraph.children)
         return paragraph
 
+    @create.register
+    @staticmethod
+    def _(marko_heading: extended_markdown.Heading, parent: Parented):
+        heading = Heading(parent, marko_heading.level)
+        RenderableFactory._create_runs(heading, marko_heading.children)
+        return heading
 
     @create.register
     @staticmethod

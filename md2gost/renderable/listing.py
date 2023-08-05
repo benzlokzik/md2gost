@@ -36,7 +36,7 @@ class Listing(Renderable):
             self.paragraphs.append(paragraph)
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
-        layout_state.max_width -= Pt(5)
+        # layout_state.max_width -= Pt(5)
 
         table = self._create_table(self.parent, layout_state.max_width)
         previous = None

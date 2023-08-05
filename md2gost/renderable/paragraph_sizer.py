@@ -57,13 +57,12 @@ class Font:
     def get_text_width(self, text: str) -> Length:
         if not self.is_mono:
             bbox = self._draw.textbbox((0, 0), text, self._freetypefont)
-            width = (bbox[2] - bbox[0]) * Length._EMUS_PER_PT
-            return Length(width)
+            return Pt(bbox[2] - bbox[0])
         else:
             return Pt(len(text) * self._face.glyph.advance.x / 64)
 
     def get_line_height(self):
-        return Pt((self._face.size.height-24) / 64)
+        return Pt(self._face.size.height / 64)
 
     @cached_property
     def is_mono(self):

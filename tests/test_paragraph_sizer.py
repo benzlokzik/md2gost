@@ -129,3 +129,29 @@ class TestParagraphSizer(unittest.TestCase):
         ps = ParagraphSizer(paragraph, None, self._max_width)
 
         self.assertEqual(4, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
+    def test_count_lines_courier(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run("""            table._cells[0]._element.append(paragraph_rendered_info.docx_element._element)""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width-0)
+
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width-0, paragraph.style.font, 0))
+
+    def test_count_lines_courier2(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """                continuation_paragraph = Paragraph(self.parent)""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - 0)
+
+        self.assertEqual(1, ps.count_lines(paragraph.runs, self._max_width - 0, paragraph.style.font, 0))
+
+    def test_count_lines_courier3(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - 0)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - 0, paragraph.style.font, 0))
