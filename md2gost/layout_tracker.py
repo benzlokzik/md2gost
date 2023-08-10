@@ -31,13 +31,20 @@ class LayoutState:
 class LayoutTracker:
     def __init__(self, max_height: Length, max_width: Length):
         self._state = LayoutState(max_height, max_width)
+        self._is_new_page = False
 
     @property
     def current_state(self):
         return copy(self._state)
 
+    @property
+    def is_new_page(self):
+        return self._is_new_page
+
     def add_height(self, height: Length):
+        page = self._state.page
         self._state.add_height(height)
+        self._is_new_page = self._state.page > page
 
     def can_fit_to_page(self, height: Length):
         return height <= self._state.remaining_page_height

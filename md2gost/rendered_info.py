@@ -7,4 +7,3 @@ class RenderedInfo:
     docx_element: Parented
     is_added_to_new_page: bool
     height: Length
-    roles = list[str]

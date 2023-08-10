@@ -18,6 +18,10 @@ class Renderer:
             - self._document.sections[0].right_margin
         self._layout_tracker = LayoutTracker(max_height, max_width)
 
+        self.previous_rendered = None
+
+        self._to_new_page: list[Renderable] = []
+
     def process(self, renderables: list[Renderable]):
         # add page numbering to the footer
         paragraph = self._document.sections[0].footer.paragraphs[0]
@@ -27,13 +31,26 @@ class Renderer:
             "w:instr": "PAGE \\* MERGEFORMAT"
         }))
 
-        previous_rendered: RenderedInfo | None = None
         for i in range(len(renderables)):
-            infos = renderables[i].render(previous_rendered, self._layout_tracker.current_state)
+            if self._layout_tracker.is_new_page:
+                self._flush_to_new_screen()
+
+            infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
 
             for info in infos:
-                self._add(info.docx_element, info.height)
-                previous_rendered = info
+                if isinstance(info, Renderable):
+                    self._to_new_page.append(info)
+                else:
+                    self._add(info.docx_element, info.height)
+                    self.previous_rendered = info
+
+        self._flush_to_new_screen()
+
+    def _flush_to_new_screen(self):
+        while self._to_new_page:
+            renderable_ = self._to_new_page.pop(0)
+            for info_ in renderable_.render(self.previous_rendered, self._layout_tracker.current_state):
+                self._add(info_.docx_element, info_.height)
 
     def _add(self, element: Parented, height: Length):
         self._document._body._element.append(

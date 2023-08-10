@@ -26,6 +26,8 @@ class RenderableFactory:
                 paragraph.add_run(child.children,
                                   extended_markdown.StrongEmphasis in classes or None,
                                   extended_markdown.Emphasis in classes or None)
+            elif isinstance(child, extended_markdown.Image):
+                paragraph.add_image(child.dest)
             elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis)):
                 RenderableFactory._create_runs(paragraph, child.children, classes+[type(child)])
             else:
