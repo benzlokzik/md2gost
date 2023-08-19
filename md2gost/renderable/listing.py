@@ -41,16 +41,22 @@ class Listing(Renderable):
         table = self._create_table(self.parent, layout_state.max_width)
         previous = None
 
-        table_height = 0
+        table_height = Pt(1)  # table borders, 4 eights of point for each border
+
+        # if first line doesn't fit move listing to the next page
+        paragraph_rendered_info = next(self.paragraphs[0].render(previous, copy(layout_state)))
+        if paragraph_rendered_info.height + table_height > layout_state.remaining_page_height:
+            table_height += layout_state.remaining_page_height
+            layout_state.add_height(layout_state.remaining_page_height)
 
         for paragraph in self.paragraphs:
-            paragraph_rendered_info = next(paragraph.render(previous, layout_state))
+            paragraph_rendered_info = next(paragraph.render(previous, copy(layout_state)))
 
             if paragraph_rendered_info.height > layout_state.remaining_page_height:  # todo add before after
                 table_rendered_info = RenderedInfo(table, False, table_height)
                 yield table_rendered_info
 
-                table_height = 0
+                table_height = Pt(1)  # table borders, 4 eights of point for each border
 
                 continuation_paragraph = Paragraph(self.parent)
                 continuation_paragraph.add_run("Продолжение листинга")
@@ -75,7 +81,7 @@ class Listing(Renderable):
 
                 previous = None
 
-                paragraph_rendered_info = next(paragraph.render(previous, layout_state))
+                paragraph_rendered_info = next(paragraph.render(previous, copy(layout_state)))
 
             table._cells[0]._element.append(paragraph_rendered_info.docx_element._element)
             layout_state.add_height(paragraph_rendered_info.height)

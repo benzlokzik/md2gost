@@ -72,6 +72,13 @@ class Paragraph(Renderable):
             if layout_state.current_page_height == 0 and layout_state.page > 1:
                 height_data.before = 0
 
+            # if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph)\
+            #         and "Heading" in previous_rendered.docx_element.style.name\
+            #         and ((min(2, height_data.lines) - 1) * height_data.line_spacing + 1) * height_data.line_height\
+            #             > layout_state.remaining_page_height:
+            #     height = layout_state.remaining_page_height + previous_rendered.height + height_data.full
+            # # if False:
+            # #     pass
             if layout_state.current_page_height + height_data.before + height_data.base <= layout_state.max_height <\
                     layout_state.current_page_height + height_data.before + height_data.base + height_data.after:
                 # height without space_after fits but with space_after doesn't, so height is remaining page space
@@ -93,7 +100,7 @@ class Paragraph(Renderable):
         images = iter(self._images)
 
         for image in images:
-            rendered_image = next(image.render(previous_rendered, copy(layout_state)))
+            previous_rendered = rendered_image = next(image.render(previous_rendered, copy(layout_state)))
             if rendered_image.height <= layout_state.remaining_page_height:
                 yield rendered_image
                 layout_state.add_height(rendered_image.height)
@@ -101,5 +108,4 @@ class Paragraph(Renderable):
                 yield image
                 break
 
-        for image in images:
-            yield image
+        yield from images

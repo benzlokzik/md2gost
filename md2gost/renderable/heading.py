@@ -1,9 +1,11 @@
 from copy import copy
 from typing import Generator
 
-from docx.shared import Parented
+from docx.text.paragraph import Paragraph as DocxParagraph
+from docx.shared import Parented, Length
 
 from .break_ import Break
+from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
 from .paragraph import Paragraph
 from ..rendered_info import RenderedInfo
@@ -25,4 +27,17 @@ class Heading(Paragraph):
         if self._level == 1 and layout_state.page != 1:
             yield from Break(self._parent).render(previous_rendered, copy(layout_state))
 
-        yield from super().render(previous_rendered, layout_state)
+        height_data = ParagraphSizer(
+            self._docx_paragraph,
+            previous_rendered.docx_element
+            if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph) else None,
+            layout_state.max_width).calculate_height()
+
+        # if a heading + 2 lines don't fit to the page, they go to the next page
+        if ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
+                <= layout_state.remaining_page_height:
+            height = height_data.full
+        else:
+            height = layout_state.remaining_page_height + height_data.full
+
+        yield RenderedInfo(self._docx_paragraph, False, Length(height))
