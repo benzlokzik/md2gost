@@ -4,7 +4,9 @@ from dataclasses import dataclass
 
 from docx.shared import Length, Parented, RGBColor
 from docx.text.paragraph import Paragraph as DocxParagraph
+from docx.text.paragraph import Run as DocxRun
 from docx.enum.text import WD_LINE_SPACING
+from docx.opc.constants import RELATIONSHIP_TYPE
 
 from . import Renderable
 from .image import Image
@@ -12,14 +14,6 @@ from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
 from ..util import create_element
 from ..rendered_info import RenderedInfo
-
-
-@dataclass
-class Run:
-    text: str
-    is_bold: bool = None
-    is_italic: bool = None
-    color: RGBColor = None
 
 
 class Paragraph(Renderable):
@@ -37,6 +31,21 @@ class Paragraph(Renderable):
 
     def add_image(self, path: str):
         self._images.append(Image(self._parent, path))
+
+    def add_link(self, text: str, url: str, is_bold: bool = None, is_italic: bool = None):
+        r_id = self._parent.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+        hyperlink = create_element("w:hyperlink", {
+            "r:id": r_id
+        })
+
+        run = DocxRun(create_element("w:r"), self._docx_paragraph)
+        run.text = text
+        run.style = "Hyperlink"
+
+        hyperlink.append(run._element)
+
+        self._docx_paragraph._p.append(hyperlink)
 
     @property
     def style(self):

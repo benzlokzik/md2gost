@@ -1,11 +1,9 @@
 from collections.abc import Generator
 
 from docx import Document
-from docx.shared import RGBColor
 from marko.block import BlankLine
 
 from .extended_markdown import markdown
-from .renderable.paragraph import Paragraph, Run
 from .renderable.renderable import Renderable
 from .renderable_factory import RenderableFactory
 
