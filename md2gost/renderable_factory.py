@@ -5,6 +5,7 @@ from docx.shared import Parented, RGBColor
 from .renderable import *
 from .renderable import Renderable
 from . import extended_markdown
+from .renderable.formula import Formula
 from .renderable.heading import Heading
 
 
@@ -58,3 +59,9 @@ class RenderableFactory:
         listing = Listing(parent)
         listing.set_text(marko_code_block.children[0].children)
         return listing
+
+    @create.register
+    @staticmethod
+    def _(marko_formula: extended_markdown.Formula, parent: Parented):
+        formula = Formula(parent, marko_formula.formula)
+        return formula

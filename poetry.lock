@@ -358,6 +358,17 @@ files = [
 ]
 
 [[package]]
+name = "latex2mathml"
+version = "3.76.0"
+description = "Pure Python library for LaTeX to MathML conversion"
+optional = false
+python-versions = ">=3.8.1,<4.0.0"
+files = [
+    {file = "latex2mathml-3.76.0-py3-none-any.whl", hash = "sha256:ac6d1d6bf5673d95acc82ebbb86b4d04a8a0737fd8664e8a28a0d28091b7b445"},
+    {file = "latex2mathml-3.76.0.tar.gz", hash = "sha256:b3ebae966ba2b578b4284738f44960791c204601271b43ddc4df5dd9d02cab0b"},
+]
+
+[[package]]
 name = "lxml"
 version = "4.9.3"
 description = "Powerful and Pythonic XML processing library combining libxml2/libxslt with the ElementTree API."
@@ -763,4 +774,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "284f07a5e0c13ae43adcf7fd939e2519149c5a9d081b0b4354e22d639a0e51a3"
+content-hash = "e02b8320c033616ba928cbab7aada066e2b17fc0e74bdeccf9ff9f464b10ac6a"
