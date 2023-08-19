@@ -1,3 +1,4 @@
+from copy import copy
 from io import BytesIO
 from typing import Generator
 
@@ -6,6 +7,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Parented, Length
 from docx.text.paragraph import Paragraph
 
+from .caption import Caption
 from .renderable import Renderable
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
@@ -30,6 +32,9 @@ class Image(Renderable):
         else:
             self._image = run.add_picture(path)
 
+        self._caption = Caption(parent, "Рисунок", "hello")
+        self._caption.center()
+
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         # limit width
         if self._image.width > layout_state.max_width:
@@ -48,6 +53,11 @@ class Image(Renderable):
         if layout_state.remaining_page_height < height:
             height += layout_state.remaining_page_height
 
-        yield RenderedInfo(self._docx_paragraph,
-                           self._image.height > layout_state.remaining_page_height,
-                           Length(height))
+        yield (rendered_image := RenderedInfo(
+            self._docx_paragraph,
+            self._image.height > layout_state.remaining_page_height,
+            Length(height)))
+
+        layout_state.add_height(rendered_image.height)
+
+        yield from self._caption.render(rendered_image, copy(layout_state))

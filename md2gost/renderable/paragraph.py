@@ -17,7 +17,8 @@ from ..rendered_info import RenderedInfo
 
 
 class Paragraph(Renderable):
-    def __init__(self, parent: Parented):
+    def __init__(self, parent: Parented, make_exactly=False):
+        self._make_exactly = make_exactly
         self._parent = parent
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
         self._was_rendered = False
@@ -73,7 +74,7 @@ class Paragraph(Renderable):
                           layout_state.max_width).calculate_height()
 
             # ensure line height, should be removed in the future, when measuring line_height is fixed
-            if not self._was_rendered:
+            if not self._was_rendered and self._make_exactly:
                 self._docx_paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
                 self._docx_paragraph.paragraph_format.line_spacing = Length(height_data.line_height * height_data.line_spacing)
                 self._was_rendered = True
@@ -109,10 +110,12 @@ class Paragraph(Renderable):
         images = iter(self._images)
 
         for image in images:
-            previous_rendered = rendered_image = next(image.render(previous_rendered, copy(layout_state)))
-            if rendered_image.height <= layout_state.remaining_page_height:
-                yield rendered_image
-                layout_state.add_height(rendered_image.height)
+            rendered_image = list(image.render(previous_rendered, copy(layout_state)))
+            rendered_image_height = sum([x.height for x in rendered_image])
+            previous_rendered = rendered_image[-1]
+            if rendered_image_height <= layout_state.remaining_page_height:
+                yield from rendered_image
+                layout_state.add_height(rendered_image_height)
             else:
                 yield image
                 break

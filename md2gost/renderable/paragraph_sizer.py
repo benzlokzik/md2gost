@@ -83,7 +83,7 @@ class ParagraphSizerResult:
 
     @property
     def base(self) -> Length:
-        return Length((self.lines - 1) * self.line_spacing + 1) * self.line_height
+        return self.before + ((self.lines - 1) * self.line_spacing + 1) * self.line_height
 
     @property
     def full(self) -> Length:

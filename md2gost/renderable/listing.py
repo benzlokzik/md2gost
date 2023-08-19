@@ -30,7 +30,7 @@ class Listing(Renderable):
 
     def set_text(self, text: str):
         for line in text.removesuffix("\n").split("\n"):
-            paragraph = Paragraph(self.parent)
+            paragraph = Paragraph(self.parent, True)
             paragraph.add_run(line)
             paragraph.style = "Code"
             self.paragraphs.append(paragraph)
