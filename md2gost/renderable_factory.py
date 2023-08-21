@@ -1,3 +1,4 @@
+import logging
 from functools import singledispatchmethod
 
 from docx.shared import Parented, RGBColor
@@ -17,6 +18,7 @@ class RenderableFactory:
             -> Renderable:
         paragraph = Paragraph(parent)
         paragraph.add_run(f"{marko_element.get_type()} is not supported", color=RGBColor.from_string('ff0000'))
+        logging.warning(f"{marko_element.get_type()} is not supported")
         return paragraph
 
     @staticmethod
@@ -41,6 +43,7 @@ class RenderableFactory:
                 RenderableFactory._create_runs(paragraph, child.children, classes+[type(child)])
             else:
                 paragraph.add_run(f" {child.get_type()} is not supported ", color=RGBColor.from_string("FF0000"))
+                logging.warning(f"{child.get_type()} is not supported")
 
     @create.register
     @staticmethod
