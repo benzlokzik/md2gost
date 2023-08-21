@@ -1,8 +1,15 @@
 from copy import copy
+import os
 from typing import Generator
 
-from docx.shared import Length, Pt
+from docx.shared import Length, Pt, RGBColor
 from docx.table import Table
+
+from pygments import highlight
+from pygments.formatter import Formatter
+from pygments.lexers import get_lexer_by_name
+from pygments.styles import get_style_by_name
+
 
 from .paragraph import Paragraph
 from .break_ import Break
@@ -12,8 +19,26 @@ from ..rendered_info import RenderedInfo
 from ..util import create_element
 
 
+class DocxParagraphPygmentsFormatter(Formatter):
+    def __init__(self, paragraph: Paragraph, **options):
+        Formatter.__init__(self, style="sas", **options)
+
+        self._paragraph = paragraph
+        self._styles = {}
+
+        for token, style in self.style:
+            self._styles[token] = style
+
+    def format(self, tokensource, outfile):
+        for ttype, value in tokensource:
+            style = self._styles[ttype]
+            self._paragraph.add_run(value.removesuffix("\n"), style["bold"] or None, style["italic"] in style or None,
+                                    RGBColor.from_string(style['color']) if style['color'] else None)
+
+
 class Listing(Renderable):
-    def __init__(self, parent):
+    def __init__(self, parent, language: str):
+        self._language = language
         self.parent = parent
         self.paragraphs: list[Paragraph] = []
 
@@ -31,7 +56,10 @@ class Listing(Renderable):
     def set_text(self, text: str):
         for line in text.removesuffix("\n").split("\n"):
             paragraph = Paragraph(self.parent, True)
-            paragraph.add_run(line)
+            if self._language and "SYNTAX_HIGHLIGHTING" in os.environ and os.environ["SYNTAX_HIGHLIGHTING"] == "1":
+                highlight(line, get_lexer_by_name(self._language), DocxParagraphPygmentsFormatter(paragraph))
+            else:
+                paragraph.add_run(line)
             paragraph.style = "Code"
             self.paragraphs.append(paragraph)
 

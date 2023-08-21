@@ -62,7 +62,7 @@ class RenderableFactory:
     @create.register
     @staticmethod
     def _(marko_code_block: extended_markdown.FencedCode | extended_markdown.CodeBlock, parent: Parented):
-        listing = Listing(parent)
+        listing = Listing(parent, marko_code_block.lang)
         listing.set_text(marko_code_block.children[0].children)
         return listing
 

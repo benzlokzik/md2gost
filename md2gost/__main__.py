@@ -1,5 +1,5 @@
 #!/bin/python
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 import os.path
 from getpass import getuser
 
@@ -21,10 +21,14 @@ def main():
     parser.add_argument("-t", "--template", help="Путь до шаблона .docx")
     parser.add_argument("-T", "--title", help="Путь до файла титульной(-ых) \
                             страниц(ы)")
+    parser.add_argument("--syntax-highlighting", help="Подсветка синтаксиса в листингах",
+                        action=BooleanOptionalAction)
 
     args = parser.parse_args()
     filename, output, template, title = \
         args.filename, args.output, args.template, args.title
+    if args.syntax_highlighting:
+        os.environ["SYNTAX_HIGHLIGHTING"] = "1"
 
     if not filename.endswith(".md"):
         print("Error: filename must have md format")
