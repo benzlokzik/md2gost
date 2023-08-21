@@ -137,27 +137,38 @@ class ParagraphSizer:
         space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")\
                       *(0.5 if not is_mono else 1)
 
+        words: list[list[tuple[str, Font]]] = []
+        prev_ends_with_space = True
         for run in runs:
             run_docx_font = _merge_objects(
                 docx_font,
                 run.font
             )
             font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
-            for word in run.text.split(" "):
-                word_size = font.get_text_width(word)+space_width
-                if line_width + word_size - space_width < max_width:
-                    line_width += word_size + space_width
-                else:
-                    if word_size > max_width:
-                        if lines == 1 and line_width == first_line_indent:
-                            line_width = (word_size - (max_width - line_width)) % max_width
-                            lines += ceil((word_size - (max_width - line_width)) / max_width)
-                        else:
-                            line_width = word_size % max_width
-                            lines += ceil(word_size / max_width)
+
+            run_words = iter(run.text.split(" "))
+            if not (run.text.startswith(" ") or prev_ends_with_space) and words and run_words:
+                words[-1].append((next(run_words), font))
+            for run_word in run_words:
+                words.append([(run_word, font)])
+
+            prev_ends_with_space = run.text.endswith(" ")
+
+        for word in words:
+            word_size = sum([font.get_text_width(word_) for word_, font in word])+space_width
+            if line_width + word_size - space_width < max_width:
+                line_width += word_size + space_width
+            else:
+                if word_size > max_width:
+                    if lines == 1 and line_width == first_line_indent:
+                        line_width = (word_size - (max_width - line_width)) % max_width
+                        lines += ceil((word_size - (max_width - line_width)) / max_width)
                     else:
-                        line_width = word_size
-                        lines += 1
+                        line_width = word_size % max_width
+                        lines += ceil(word_size / max_width)
+                else:
+                    line_width = word_size
+                    lines += 1
         return lines
 
     def calculate_height(self) -> ParagraphSizerResult:
