@@ -15,6 +15,7 @@ pillow = "^10.0.0"
 matplotlib = { version = "3.7.2", platform = "!= linux" }
 requests = "^2.31.0"
 latex2mathml = "^3.76.0"
+pygments = "^2.16.1"
 
 
 [build-system]
