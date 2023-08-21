@@ -8,6 +8,7 @@ from .heading import Heading
 from .reference import Reference
 from .table import Table
 from .toc import TOC
+from .inline_formula import InlineFormula
 
 from marko import inline, block
 from marko.ext.gfm import elements
@@ -25,7 +26,8 @@ Extension = MarkoExtension(
         Caption,
         Table,
         TOC,
-        Heading
+        Heading,
+        InlineFormula
     ]
 )
 
