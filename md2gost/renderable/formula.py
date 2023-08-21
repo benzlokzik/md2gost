@@ -52,11 +52,11 @@ class Formula(Renderable):
         right_paragraph = right_cell.paragraphs[0]
         right_paragraph.style = "Formula Numbering"
         right_paragraph._p.append(create_element("w:r", "("))
-        self._numbering_run = create_element("w:r")
+        self._numbering_run = create_element("w:r", "?")
         right_paragraph._p.append(
             create_element("w:fldSimple", {
                 "w:instr": f"SEQ formula \\* ARABIC"
-            }, [create_element("w:r", "1")]))
+            }, [self._numbering_run]))
         right_paragraph._p.append(create_element("w:r", ")"))
         right_cell.vertical_alignment = \
             WD_CELL_VERTICAL_ALIGNMENT.CENTER

@@ -19,7 +19,7 @@ class Caption(Renderable):
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
 
         self._docx_paragraph.style = "Caption"
-        self._docx_paragraph.add_run(f"{type_} 1 - {text}")
+        self._docx_paragraph.add_run(f"{type_} ? - {text}")
 
     def center(self):
         self._docx_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
