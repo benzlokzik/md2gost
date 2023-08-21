@@ -37,6 +37,7 @@ class DocxParagraphPygmentsFormatter(Formatter):
             style = self._styles[ttype]
             self._paragraphs[-1].add_run(value.removesuffix("\n"), style["bold"] or None, style["italic"] in style or None,
                                     RGBColor.from_string(style['color']) if style['color'] else None)
+        self._paragraphs.pop(-1)  # remove last empty line
 
 
 class Listing(Renderable):
