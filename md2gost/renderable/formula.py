@@ -19,14 +19,17 @@ _HEIGHT = Pt(50)
 
 class Formula(Renderable):
     def __init__(self, parent, latex_formula: str):
-        mathml = latex2mathml.converter.convert(latex_formula)
-        tree = etree.fromstring(mathml)
-        xslt = etree.parse(
-            os.path.join(os.path.dirname(__file__), "mml2omml")
-        )
-        transform = etree.XSLT(xslt)
-        new_dom = transform(tree)
-        word_math = new_dom.getroot()
+        try:
+            mathml = latex2mathml.converter.convert(latex_formula)
+            tree = etree.fromstring(mathml)
+            xslt = etree.parse(
+                os.path.join(os.path.dirname(__file__), "mml2omml")
+            )
+            transform = etree.XSLT(xslt)
+            new_dom = transform(tree)
+            word_math = new_dom.getroot()
+        except Exception:
+            raise ValueError(f"Can't parse the formula:\n{latex_formula}")
 
         sect = parent.part.document.sections[0]
         document_width = sect.page_width - sect.right_margin - sect.left_margin
@@ -36,8 +39,9 @@ class Formula(Renderable):
         ]), parent)
 
         row = table.add_row()
-        table.add_column(document_width - Pt(10))
-        table.add_column(Pt(10))
+        right_cell_width = Pt(30)
+        table.add_column(document_width - right_cell_width)
+        table.add_column(right_cell_width)
         left_cell = table.cell(0,0)
         right_cell = table.cell(0,1)
         # TODO: implement proper size
