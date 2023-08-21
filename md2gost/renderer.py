@@ -1,3 +1,4 @@
+from itertools import chain
 from docx.document import Document
 from docx.shared import Length, Cm, Parented, Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -32,10 +33,14 @@ class Renderer:
         }))
 
         for i in range(len(renderables)):
-            if self._layout_tracker.is_new_page:
-                self._flush_to_new_screen()
-
             infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
+
+            first = next(infos)
+            if isinstance(first, RenderedInfo) and first.height >= self._layout_tracker._state.remaining_page_height:
+                self._flush_to_new_screen()
+                infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
+            else:
+                infos = chain([first], infos)
 
             for info in infos:
                 if isinstance(info, Renderable):
