@@ -1,6 +1,6 @@
 from copy import copy
 import os
-from typing import Generator
+from typing import Generator, Callable
 
 from docx.shared import Length, Pt, RGBColor
 from docx.table import Table
@@ -20,19 +20,22 @@ from ..util import create_element
 
 
 class DocxParagraphPygmentsFormatter(Formatter):
-    def __init__(self, paragraph: Paragraph, **options):
+    def __init__(self, paragraphs: list[Paragraph], creator: Callable[[],Paragraph], **options):
         Formatter.__init__(self, style="sas", **options)
-
-        self._paragraph = paragraph
+        self._creator = creator
+        self._paragraphs = paragraphs
         self._styles = {}
 
         for token, style in self.style:
             self._styles[token] = style
 
     def format(self, tokensource, outfile):
+        self._paragraphs.append(self._creator())
         for ttype, value in tokensource:
+            if value == "\n":
+                self._paragraphs.append(self._creator())
             style = self._styles[ttype]
-            self._paragraph.add_run(value.removesuffix("\n"), style["bold"] or None, style["italic"] in style or None,
+            self._paragraphs[-1].add_run(value.removesuffix("\n"), style["bold"] or None, style["italic"] in style or None,
                                     RGBColor.from_string(style['color']) if style['color'] else None)
 
 
@@ -54,14 +57,21 @@ class Listing(Renderable):
         return table
 
     def set_text(self, text: str):
-        for line in text.removesuffix("\n").split("\n"):
+        def create_paragraph() -> Paragraph:
             paragraph = Paragraph(self.parent, True)
-            if self._language and "SYNTAX_HIGHLIGHTING" in os.environ and os.environ["SYNTAX_HIGHLIGHTING"] == "1":
-                highlight(line, get_lexer_by_name(self._language), DocxParagraphPygmentsFormatter(paragraph))
-            else:
-                paragraph.add_run(line)
             paragraph.style = "Code"
-            self.paragraphs.append(paragraph)
+            return paragraph
+
+        text = text.removesuffix("\n")
+
+        if self._language and "SYNTAX_HIGHLIGHTING" in os.environ and os.environ["SYNTAX_HIGHLIGHTING"] == "1":
+            formatter = DocxParagraphPygmentsFormatter(self.paragraphs, lambda: create_paragraph())
+            highlight(text, get_lexer_by_name(self._language), formatter)
+        else:
+            for line in text.removesuffix("\n").split("\n"):
+                paragraph = create_paragraph()
+                paragraph.add_run(line)
+                self.paragraphs.append(paragraph)
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         # layout_state.max_width -= Pt(5)
