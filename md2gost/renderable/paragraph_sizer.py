@@ -134,42 +134,55 @@ class ParagraphSizer:
         lines = 1
         line_width = first_line_indent
 
-        space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")\
-                      *(0.5 if not is_mono else 1)
+        space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")
+        if not is_mono:
+            space_width *= 0.85
 
-        words: list[list[tuple[str, Font]]] = []
-        prev_ends_with_space = True
-        for run in runs:
+        word_part = ""
+        word_parts_widths = [0]
+        spaces = 0
+        for i, run in enumerate(runs):
+            if word_part:
+                word_part = ""
+                word_parts_widths.append(0)
+
             run_docx_font = _merge_objects(
                 docx_font,
                 run.font
             )
             font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
 
-            run_words = iter(run.text.split(" "))
-            if not (run.text.startswith(" ") or prev_ends_with_space) and words and run_words:
-                words[-1].append((next(run_words), font))
-            for run_word in run_words:
-                words.append([(run_word, font)])
+            run_text = run.text
+            if i == len(runs) - 1:
+                run_text += " "  # add space to the end of the last run, so it adds the last word
 
-            prev_ends_with_space = run.text.endswith(" ")
+            for c in run_text:
+                if c == " ":
+                    if any(word_parts_widths):
+                        width = spaces*space_width + sum(word_parts_widths)
+                        if width <= max_width - line_width:
+                            line_width += width
+                        elif width > max_width - first_line_indent:
+                            if lines == 1 and line_width == first_line_indent and not spaces:
+                                lines += ceil((width - (max_width - first_line_indent)) / max_width)
+                                line_width = (width - (max_width - first_line_indent)) % max_width
+                            else:
+                                lines += ceil(width / max_width)
+                                line_width = width % max_width
+                        else:
+                            lines += 1
+                            line_width = sum(word_parts_widths)
 
-        for word in words:
-            word_size = sum([font.get_text_width(word_) for word_, font in word])+space_width
-            if line_width + word_size - space_width < max_width:
-                line_width += word_size + space_width
-            else:
-                if word_size > max_width:
-                    if lines == 1 and line_width == first_line_indent:
-                        line_width = (word_size - (max_width - line_width)) % max_width
-                        lines += ceil((word_size - (max_width - line_width)) / max_width)
+                        word_part = ""
+                        word_parts_widths = [0]
+                        spaces = 1
                     else:
-                        line_width = word_size % max_width
-                        lines += ceil(word_size / max_width)
+                        spaces += 1
                 else:
-                    line_width = word_size
-                    lines += 1
-        return lines
+                    word_part += c
+                    word_parts_widths[-1] = font.get_text_width(word_part)
+
+        return int(lines)
 
     def calculate_height(self) -> ParagraphSizerResult:
         max_width = self.max_width
@@ -190,7 +203,14 @@ class ParagraphSizer:
 
         font = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt)
 
-        lines = self.count_lines(self.paragraph.runs, max_width, docx_font, paragraph_format.first_line_indent or 0,
+        # here self.paragraph.runs is not used because
+        # it does not always return all runs (e.g. if they are inside hyperlink)
+        runs = []
+        for element in self.paragraph._element.getiterator():
+            if isinstance(element, CT_R):
+                runs.append(Run(element, self.paragraph))
+
+        lines = self.count_lines(runs, max_width, docx_font, paragraph_format.first_line_indent or 0,
                                  font.is_mono)
 
         previous_paragraph_format: ParagraphFormat = None

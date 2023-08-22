@@ -4,6 +4,7 @@ import docx
 from docx import Document
 
 from md2gost.renderable.paragraph_sizer import Font, ParagraphSizer
+from md2gost.renderable.listing import LISTING_OFFSET
 from docx.shared import Pt, Mm, Cm
 
 from . import _create_test_document, _EMUS_PER_PX
@@ -64,7 +65,6 @@ class TestFont(unittest.case.TestCase):
         font = Font("Times New Roman", False, False, 12)
         self.assertFalse(font.is_mono)
 
-
 class TestParagraphSizer(unittest.TestCase):
     def setUp(self):
         self._document, self._max_height, self._max_width = _create_test_document()
@@ -100,6 +100,14 @@ class TestParagraphSizer(unittest.TestCase):
 
         self.assertEqual(11, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
 
+    def test_count_lines_short_last_line2(self):
+        paragraph = self._document.add_paragraph()
+        paragraph.add_run("OpenAI is a leading artificial intelligence research organization, known for advancements in language models like GPT. Click the link to learn more. Hello world")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width)
+
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
     def test_count_lines_long_last_line(self):
         paragraph = self._document.add_paragraph()
         paragraph.add_run("Donec finibus elementum lectus non ultricies. Pellentesque dictum tellus a neque rutrum "
@@ -113,6 +121,23 @@ class TestParagraphSizer(unittest.TestCase):
         ps = ParagraphSizer(paragraph, None, self._max_width)
 
         self.assertEqual(7, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
+    def test_count_lines_long_last_line2(self):
+        paragraph = self._document.add_paragraph()
+        paragraph.add_run('Markdown supports rendering mathematical formulas using LaTeX syntax. This allows you to include complex equations and mathematical notation in your documents.')
+
+        ps = ParagraphSizer(paragraph, None, self._max_width)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
+    def test_count_lines_long_last_line3(self):
+        paragraph = self._document.add_paragraph()
+        paragraph.add_run("Markdown's LaTeX syntax allows you to easily write fractions and exponents. For instance, you can represent the derivative of a function  InlineFormula is not supported  with respect to  InlineFormula is not supported  using the following notation:")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width)
+
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
 
     def test_count_lines_long_word(self):
         paragraph = self._document.add_paragraph()
@@ -134,24 +159,123 @@ class TestParagraphSizer(unittest.TestCase):
         paragraph = self._document.add_paragraph(style="Code")
         paragraph.add_run("""            table._cells[0]._element.append(paragraph_rendered_info.docx_element._element)""")
 
-        ps = ParagraphSizer(paragraph, None, self._max_width-0)
+        ps = ParagraphSizer(paragraph, None, self._max_width-LISTING_OFFSET)
 
-        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width-0, paragraph.style.font, 0))
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width-LISTING_OFFSET, paragraph.style.font, 0))
 
     def test_count_lines_courier2(self):
         paragraph = self._document.add_paragraph(style="Code")
         paragraph.add_run(
             """                continuation_paragraph = Paragraph(self.parent)""")
 
-        ps = ParagraphSizer(paragraph, None, self._max_width - 0)
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
 
-        self.assertEqual(1, ps.count_lines(paragraph.runs, self._max_width - 0, paragraph.style.font, 0))
+        self.assertEqual(1, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0))
 
     def test_count_lines_courier3(self):
         paragraph = self._document.add_paragraph(style="Code")
         paragraph.add_run(
             """ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo""")
 
-        ps = ParagraphSizer(paragraph, None, self._max_width - 0)
+        ps = ParagraphSizer(paragraph, None, self._max_width - Pt(14))
 
-        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - 0, paragraph.style.font, 0))
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - Pt(14), paragraph.style.font, 0))
+
+    def test_count_lines_courier4(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """    def add_link(self, text: str, url: str, is_bold: bool = None, is_italic: bool = None):""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0))
+
+    def test_count_lines_courier5(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """                self._docx_paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0))
+
+    def test_count_lines_courier6(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """            #         and "Heading" in previous_rendered.docx_element.style.name\\""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0))
+
+    def test_count_lines_courier7(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """        run = DocxRun(create_element("w:r"), self._docx_paragraph)""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(1, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    def test_count_lines_courier7(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """            #         and ((min(2, height_data.lines) - 1) * height_data.line_spacing + 1) * height_data.line_height\\""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    def test_count_lines_courier8(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """        return self._docx_paragraph.paragraph_format.first_line_indent""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    def test_count_lines_courier9(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """        self._docx_paragraph.paragraph_format.first_line_indent = value""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    def test_count_lines_courier10(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        paragraph.add_run(
+            """                if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph) else None,""")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    def test_count_lines_courier_multiple_runs(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        for run_text in ['', '        ', 'run', ' ', '=', ' ', 'DocxRun', '(', 'create_element', '(', '"', 'w:r', '"', ')', ',', ' ', 'self', '.', '_docx_paragraph', ')']:
+            paragraph.add_run(run_text)
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(1, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    def test_count_lines_courier_multiple_runs2(self):
+        paragraph = self._document.add_paragraph(style="Code")
+        for run_text in ['', '            ', '-', '>', ' ', 'Generator', '[', 'RenderedInfo', ' ', '|', ' ', 'Renderable', ',', ' ', 'None', ',', ' ', 'None', ']', ':']:
+            paragraph.add_run(run_text)
+
+        ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+
+        self.assertEqual(1, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
+
+    # def test_count_lines_courier_multiple_runs3(self):
+    #     paragraph = self._document.add_paragraph(style="Code")
+    #     for run_text in ['', '            ', '-', '>', ' ', 'Generator', '[', 'RenderedInfo', ' ', '|', ' ', 'Renderable', ',', ' ', 'None', ',', ' ', 'None', ']', ':']:
+    #         paragraph.add_run(run_text)
+    # 
+    #     ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
+    # 
+    #     self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0, True))
