@@ -40,6 +40,9 @@ class DocxParagraphPygmentsFormatter(Formatter):
         self._paragraphs.pop(-1)  # remove last empty line
 
 
+LISTING_OFFSET = Pt(31)
+
+
 class Listing(Renderable):
     def __init__(self, parent, language: str):
         self._language = language
@@ -83,13 +86,17 @@ class Listing(Renderable):
         table_height = Pt(1)  # table borders, 4 eights of point for each border
 
         # if first line doesn't fit move listing to the next page
-        paragraph_rendered_info = next(self.paragraphs[0].render(previous, copy(layout_state)))
+        paragraph_layout_state = copy(layout_state)
+        paragraph_layout_state.max_width -= LISTING_OFFSET
+        paragraph_rendered_info = next(self.paragraphs[0].render(previous, paragraph_layout_state))
         if paragraph_rendered_info.height + table_height > layout_state.remaining_page_height:
             table_height += layout_state.remaining_page_height
             layout_state.add_height(layout_state.remaining_page_height)
 
         for paragraph in self.paragraphs:
-            paragraph_rendered_info = next(paragraph.render(previous, copy(layout_state)))
+            paragraph_layout_state = copy(layout_state)
+            paragraph_layout_state.max_width -= LISTING_OFFSET
+            paragraph_rendered_info = next(paragraph.render(previous, paragraph_layout_state))
 
             if paragraph_rendered_info.height > layout_state.remaining_page_height:  # todo add before after
                 table_rendered_info = RenderedInfo(table, False, table_height)
@@ -120,7 +127,9 @@ class Listing(Renderable):
 
                 previous = None
 
-                paragraph_rendered_info = next(paragraph.render(previous, copy(layout_state)))
+                paragraph_layout_state = copy(layout_state)
+                paragraph_layout_state.max_width -= LISTING_OFFSET
+                paragraph_rendered_info = next(paragraph.render(previous, paragraph_layout_state))
 
             table._cells[0]._element.append(paragraph_rendered_info.docx_element._element)
             layout_state.add_height(paragraph_rendered_info.height)
