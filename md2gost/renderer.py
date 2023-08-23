@@ -27,11 +27,6 @@ class Renderer:
             - self._document.sections[0].right_margin
         self._layout_tracker = LayoutTracker(max_height, max_width)
 
-        self.previous_rendered = None
-
-        self._to_new_page: list[Renderable] = []
-
-    def process(self, renderables: list[Renderable]):
         # add page numbering to the footer
         paragraph = self._document.sections[0].footer.paragraphs[0]
         paragraph.paragraph_format.first_line_indent = 0
@@ -40,6 +35,11 @@ class Renderer:
             "w:instr": "PAGE \\* MERGEFORMAT"
         }))
 
+        self.previous_rendered = None
+
+        self._to_new_page: list[Renderable] = []
+
+    def process(self, renderables: list[Renderable]):
         for i in range(len(renderables)):
             infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
 

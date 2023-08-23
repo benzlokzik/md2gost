@@ -35,9 +35,12 @@ class Heading(Paragraph):
 
         # if a heading + 2 lines don't fit to the page, they go to the next page
         if ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
-                <= layout_state.remaining_page_height:
-            height = height_data.full
+                > layout_state.remaining_page_height:
+            # force this behaviour as there could be a table or an image instead of text
+            yield from Break(self._parent).render(previous_rendered, copy(layout_state))
+            self._docx_paragraph.paragraph_format.space_before = 0  # libreoffice fix
+            height = height_data.full - height_data.before
         else:
-            height = layout_state.remaining_page_height + height_data.full
+            height = height_data.full
 
         yield RenderedInfo(self._docx_paragraph, False, Length(height))

@@ -17,11 +17,9 @@ from ..rendered_info import RenderedInfo
 
 
 class Paragraph(Renderable):
-    def __init__(self, parent: Parented, make_exactly=False):
-        self._make_exactly = make_exactly
+    def __init__(self, parent: Parented):
         self._parent = parent
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
-        self._was_rendered = False
         self._images: list[Image] = []
 
     def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None):
@@ -73,27 +71,15 @@ class Paragraph(Renderable):
                           if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph) else None,
                           layout_state.max_width).calculate_height()
 
-            # ensure line height, should be removed in the future, when measuring line_height is fixed
-            if not self._was_rendered and self._make_exactly:
-                self._docx_paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
-                self._docx_paragraph.paragraph_format.line_spacing = Length(height_data.line_height * height_data.line_spacing)
-                self._was_rendered = True
-
             if layout_state.current_page_height == 0 and layout_state.page > 1:
                 height_data.before = 0
 
-            # if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph)\
-            #         and "Heading" in previous_rendered.docx_element.style.name\
-            #         and ((min(2, height_data.lines) - 1) * height_data.line_spacing + 1) * height_data.line_height\
-            #             > layout_state.remaining_page_height:
-            #     height = layout_state.remaining_page_height + previous_rendered.height + height_data.full
-            # # if False:
-            # #     pass
             if layout_state.current_page_height + height_data.before + height_data.base <= layout_state.max_height <\
                     layout_state.current_page_height + height_data.before + height_data.base + height_data.after:
                 # height without space_after fits but with space_after doesn't, so height is remaining page space
                 height = layout_state.max_height - layout_state.current_page_height
-            elif layout_state.current_page_height + height_data.before + height_data.line_height <= layout_state.max_height <\
+            elif height_data.lines > 1 and\
+                    layout_state.current_page_height + height_data.before + height_data.line_height <= layout_state.max_height <\
                     layout_state.current_page_height + height_data.base:
                 # first line without line_spacing and space_after first but rest doesn't, so take all remaining space and
                 # full height

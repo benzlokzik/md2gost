@@ -62,8 +62,15 @@ class Font:
         else:
             return Pt(len(text) * self._face.glyph.advance.x / 64)
 
-    def get_line_height(self):
-        return Pt(self._face.size.height / 64)
+    def get_line_height(self) -> Length:
+        # TODO: make it work for all fonts
+        if "Times" in str(self._face.family_name) and self._freetypefont.size == 14:
+            return Pt(16.1)
+        elif "Courier" in str(self._face.family_name) and self._freetypefont.size == 12:
+            return Pt(13.59)
+        else:
+            logging.warning(f"Not supported font {self._face.family_name} {self._freetypefont.size}, rendering may be incorrect")
+            return Pt(self._face.size.height / 64)
 
     @cached_property
     def is_mono(self):
@@ -137,7 +144,7 @@ class ParagraphSizer:
 
         space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")
         if not is_mono:
-            space_width *= 0.85
+            space_width *= 0.8
 
         word_part = ""
         word_parts_widths = [0]
@@ -241,6 +248,7 @@ class ParagraphSizer:
         line_spacing = paragraph_format.line_spacing
         if paragraph_format.line_spacing_rule == WD_LINE_SPACING.EXACTLY:
             line_spacing /= line_height
+            # raise NotImplementedError("Line spacing rule AT_LEAST is not supported")
         elif paragraph_format.line_spacing_rule == WD_LINE_SPACING.AT_LEAST:
             raise NotImplementedError("Line spacing rule AT_LEAST is not supported")
 
