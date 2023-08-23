@@ -16,7 +16,7 @@ from docx.text.paragraph import Paragraph
 from md2gost.util import create_element
 from .renderer import BOTTOM_MARGIN
 
-EMUS_PER_PX = Pt(1) * 72/96
+EMUS_PER_PX = Pt(1)
 
 
 # refer to docx.oxml.shape.CT_Inline
@@ -128,7 +128,7 @@ def to_px(length: Length) -> int:
 class _Page:
     def __init__(self, width: Length, height: Length,
                  margin_left: Length, margin_top: Length,
-                 margin_right: Length, margin_bottom: Length):
+                 margin_right: Length, margin_bottom: Length, first_color: str = None):
         self._left_offset = margin_left
         self._right_offset = margin_right
         self._max_height = height - margin_bottom
@@ -143,18 +143,26 @@ class _Page:
             (0, 255, 0, 100),  # green
             (0, 0, 255, 100),  # blue
         ]
-        self._i = 0
+        if first_color in self._colors:
+            self._i = self._colors.index(first_color)
+        else:
+            self._i = 0
 
     @classmethod
-    def from_document(cls, document: Document):
+    def from_document(cls, document: Document, *args, **kwargs):
         return cls(
             document.sections[0].page_width,
             document.sections[0].page_height,
             document.sections[0].left_margin,
             document.sections[0].top_margin,
             document.sections[0].right_margin,
-            BOTTOM_MARGIN  # todo: fix detection
+            BOTTOM_MARGIN,  # todo: fix detection
+            *args, **kwargs
         )
+
+    @property
+    def last_color(self):
+        return self._colors[(self._i-1) % len(self._colors)]
 
     def add_height(self, height: Length) -> Length:
         """Return remaining height, that didn't fit to the page"""
@@ -197,7 +205,7 @@ class Debugger:
             self._paragraphs_by_page[len(self._pages)-1] = docx_element
 
         while remaining_height:
-            self._pages.append(_Page.from_document(self._document))
+            self._pages.append(_Page.from_document(self._document, self._current_page.last_color))
             remaining_height = self._current_page.add_height(remaining_height)
 
     def after_rendered(self):
@@ -207,13 +215,13 @@ class Debugger:
             return
 
         for i in range(len(self._pages)):
-            if not self._paragraphs_by_page[i]:
+            if self._paragraphs_by_page[i] is None:
                 logging.debug(f"Skipping page {i} as there are no paragraphs")
                 continue
             add_float_picture(
                 self._paragraphs_by_page[i],
                 self._pages[i].image,
-                self._document.sections[0].page_width
+                # self._document.sections[0].page_width
             )
 
     @property
