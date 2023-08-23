@@ -29,6 +29,20 @@ class Heading(Paragraph):
             self._remove_numbering()
             self._docx_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
 
+        self._rendered_page = 0
+
+    @property
+    def rendered_page(self) -> int:
+        return self._rendered_page
+
+    @property
+    def level(self) -> int:
+        return self._level
+
+    @property
+    def text(self) -> str:
+        return self._docx_paragraph.text
+
     def _remove_numbering(self):
         self._docx_paragraph._p.pPr.append(
             create_element("w:numPr", [
@@ -42,7 +56,9 @@ class Heading(Paragraph):
         )
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
-        if self._level == 1 and layout_state.page != 1:
+        if self._level == 1 and layout_state.page != 1 and\
+                not (isinstance(previous_rendered.docx_element, DocxParagraph)
+                     and previous_rendered.docx_element.text == "\n"):
             yield from Break(self._parent).render(previous_rendered, copy(layout_state))
 
         height_data = ParagraphSizer(
@@ -60,5 +76,8 @@ class Heading(Paragraph):
             height = height_data.full - height_data.before
         else:
             height = height_data.full
+
+        layout_state.add_height(height)
+        self._rendered_page = layout_state.page
 
         yield RenderedInfo(self._docx_paragraph, False, Length(height))

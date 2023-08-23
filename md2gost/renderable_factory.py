@@ -10,6 +10,7 @@ from .renderable.caption import Caption
 from .renderable.formula import Formula
 from .renderable.heading import Heading
 from .renderable.list import List
+from .renderable.toc import ToC
 
 
 class RenderableFactory:
@@ -95,3 +96,9 @@ class RenderableFactory:
         create_items_from_marko(marko_list)
 
         return list_
+
+    @create.register
+    @staticmethod
+    def _(marko_toc: extended_markdown.TOC, parent: Parented):
+        toc = ToC(parent)
+        return toc
