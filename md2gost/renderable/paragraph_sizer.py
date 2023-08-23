@@ -5,6 +5,7 @@ from functools import cached_property
 from math import ceil
 
 from docx.enum.text import WD_LINE_SPACING
+from docx.oxml import CT_R
 from docx.text.run import Run
 from freetype import Face
 

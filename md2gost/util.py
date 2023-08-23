@@ -25,7 +25,7 @@ def create_element(name: str, *args: dict[str, str] | list[_Element] | str)\
             text = arg
 
     element = OxmlElement(name, {
-        qn(name): value for name, value in attrs.items()
+        (qn(name) if ":" in name else name): value for name, value in attrs.items()
     })
     for child in children:
         element.append(child)

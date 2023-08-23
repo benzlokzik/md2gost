@@ -23,10 +23,12 @@ def main():
                             страниц(ы)")
     parser.add_argument("--syntax-highlighting", help="Подсветка синтаксиса в листингах",
                         action=BooleanOptionalAction)
+    parser.add_argument("--debug", help="Добавляет отладочные данные в документ",
+                        action=BooleanOptionalAction)
 
     args = parser.parse_args()
-    filename, output, template, title = \
-        args.filename, args.output, args.template, args.title
+    filename, output, template, title, debug = \
+        args.filename, args.output, args.template, args.title, args.debug
     if args.syntax_highlighting:
         os.environ["SYNTAX_HIGHLIGHTING"] = "1"
 
@@ -44,10 +46,10 @@ def main():
     if not template:
         template = os.path.join(os.path.dirname(__file__), "Template.docx")
 
-    converter = Converter(filename, output, template)
+    converter = Converter(filename, output, template, debug)
     converter.convert()
 
-    document = converter.get_document()
+    document = converter.document
 
     if title:
         title = Document(title)
@@ -61,6 +63,17 @@ def main():
         "Создано при помощи https://github.com/witelokk/md2gost"
 
     document.save(output)
+
+    if debug:
+        import platform
+        if platform.system() == 'Darwin':       # macOS
+            import subprocess
+            subprocess.call(('open', output))
+        elif platform.system() == 'Windows':    # Windows
+            os.startfile(output)
+        else:                                   # linux variants
+            import subprocess
+            subprocess.call(('xdg-open', output))
 
 
 if __name__ == "__main__":

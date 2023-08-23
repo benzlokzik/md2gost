@@ -1,4 +1,6 @@
+from typing import TYPE_CHECKING
 from itertools import chain
+
 from docx.document import Document
 from docx.shared import Length, Cm, Parented, Pt
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -8,13 +10,19 @@ from .rendered_info import RenderedInfo
 from .util import create_element
 from .layout_tracker import LayoutTracker
 
+if TYPE_CHECKING:
+    from .debugger import Debugger
+
+BOTTOM_MARGIN = Cm(1.86)
+
 
 class Renderer:
     """Renders Renderable elements to docx file"""
 
-    def __init__(self, document: Document):
+    def __init__(self, document: Document, debugger: "Debugger | None" = None):
         self._document: Document = document
-        max_height = document.sections[0].page_height - document.sections[0].top_margin - Pt(36+15.6)  # todo add bottom margin detection with footer
+        self._debugger = debugger
+        max_height = document.sections[0].page_height - document.sections[0].top_margin - BOTTOM_MARGIN# - ((136 / 2) * (Pt(1)*72/96))  # todo add bottom margin detection with footer
         max_width = self._document.sections[0].page_width - self._document.sections[0].left_margin\
             - self._document.sections[0].right_margin
         self._layout_tracker = LayoutTracker(max_height, max_width)
@@ -50,6 +58,7 @@ class Renderer:
                     self.previous_rendered = info
 
         self._flush_to_new_screen()
+        self._debugger.after_rendered()
 
     def _flush_to_new_screen(self):
         while self._to_new_page:
@@ -62,3 +71,6 @@ class Renderer:
             element._element
         )
         self._layout_tracker.add_height(height)
+
+        if self._debugger:
+            self._debugger.add(element, height)
