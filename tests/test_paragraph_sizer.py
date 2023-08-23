@@ -83,6 +83,15 @@ class TestParagraphSizer(unittest.TestCase):
 
         self.assertEqual(7, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
 
+    def test_count_lines2(self):
+        paragraph = self._document.add_paragraph()
+        paragraph.add_run("Ordered lists are useful when you want to present items in a specific order. This is additional text for illustration. Ordered lists are useful when you want to present items in a specific order. This is additional text for illustration. Ordered lists are useful when you want to present items in a specific order. This is additional text for illustration.")
+
+        ps = ParagraphSizer(paragraph, None, self._max_width)
+
+        self.assertEqual(4, ps.count_lines(paragraph.runs, self._max_width, paragraph.style.font, Cm(1.25)))
+
+
     def test_count_lines_short_last_line(self):
         paragraph = self._document.add_paragraph()
         paragraph.add_run("Nam porta urna vel turpis lobortis, nec congue sem suscipit. Mauris ac facilisis metus, "
@@ -102,7 +111,7 @@ class TestParagraphSizer(unittest.TestCase):
 
     def test_count_lines_short_last_line2(self):
         paragraph = self._document.add_paragraph()
-        paragraph.add_run("OpenAI is a leading artificial intelligence research organization, known for advancements in language models like GPT. Click the link to learn more. Hello world")
+        paragraph.add_run("OpenAI is a leading artificial intelligence research organization, known for advancements in language models like GPT. Click the link to learn more. Hello world —")
 
         ps = ParagraphSizer(paragraph, None, self._max_width)
 
