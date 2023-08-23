@@ -201,12 +201,13 @@ class Debugger:
     def add(self, docx_element: Parented, height: Length):
         remaining_height = self._current_page.add_height(height)
 
-        if not self._paragraphs_by_page[len(self._pages)-1] and isinstance(docx_element, Paragraph):
-            self._paragraphs_by_page[len(self._pages)-1] = docx_element
-
         while remaining_height:
             self._pages.append(_Page.from_document(self._document, self._current_page.last_color))
             remaining_height = self._current_page.add_height(remaining_height)
+
+        if not self._paragraphs_by_page[len(self._pages)-1] and isinstance(docx_element, Paragraph)\
+                and docx_element.text and "\n" not in docx_element.text:
+            self._paragraphs_by_page[len(self._pages)-1] = docx_element
 
     def after_rendered(self):
         """Must be called after rendering is finished"""
