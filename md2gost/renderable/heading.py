@@ -1,6 +1,7 @@
 from copy import copy
 from typing import Generator
 
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.text.paragraph import Paragraph as DocxParagraph
 from docx.shared import Parented, Length
 
@@ -9,10 +10,11 @@ from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
 from .paragraph import Paragraph
 from ..rendered_info import RenderedInfo
+from ..util import create_element
 
 
 class Heading(Paragraph):
-    def __init__(self, parent: Parented, level: int):
+    def __init__(self, parent: Parented, level: int, numbered: bool):
         super().__init__(parent)
 
         self._parent = parent
@@ -22,6 +24,22 @@ class Heading(Paragraph):
             raise ValueError("Heading level must be in range from 1 to 9")
 
         self.style = f"Heading {level}"
+
+        if not numbered:
+            self._remove_numbering()
+            self._docx_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+
+    def _remove_numbering(self):
+        self._docx_paragraph._p.pPr.append(
+            create_element("w:numPr", [
+                create_element("w:ilvl", {
+                    "w:val": "0"
+                }),
+                create_element("w:numId", {
+                    "w:val": "0"
+                })
+            ])
+        )
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         if self._level == 1 and layout_state.page != 1:

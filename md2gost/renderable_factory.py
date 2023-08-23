@@ -56,7 +56,7 @@ class RenderableFactory:
     @create.register
     @staticmethod
     def _(marko_heading: extended_markdown.Heading, parent: Parented):
-        heading = Heading(parent, marko_heading.level)
+        heading = Heading(parent, marko_heading.level, marko_heading.numbered)
         RenderableFactory._create_runs(heading, marko_heading.children)
         return heading
 
