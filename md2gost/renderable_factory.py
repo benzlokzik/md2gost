@@ -9,6 +9,7 @@ from . import extended_markdown
 from .renderable.caption import Caption
 from .renderable.formula import Formula
 from .renderable.heading import Heading
+from .renderable.list import List
 
 
 class RenderableFactory:
@@ -77,3 +78,20 @@ class RenderableFactory:
     def _(marko_caption: extended_markdown.Caption, parent: Parented):
         caption = Caption(parent, marko_caption.type, marko_caption.text)
         return caption
+
+    @create.register
+    @staticmethod
+    def _(marko_list: extended_markdown.List, parent: Parented):
+        list_ = List(parent)
+
+        def create_items_from_marko(marko_list_, level=1):
+            for list_item in marko_list_.children:
+                for child in list_item.children:
+                    if isinstance(child, extended_markdown.List):
+                        create_items_from_marko(child, level + 1)
+                    elif isinstance(child, extended_markdown.Paragraph):
+                        list_.add_item(child.children[0].children, level, marko_list_.ordered)
+
+        create_items_from_marko(marko_list)
+
+        return list_
