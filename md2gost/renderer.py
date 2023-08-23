@@ -43,12 +43,15 @@ class Renderer:
         for i in range(len(renderables)):
             infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
 
-            first = next(infos)
-            if isinstance(first, RenderedInfo) and first.height >= self._layout_tracker._state.remaining_page_height:
-                self._flush_to_new_screen()
-                infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
-            else:
-                infos = chain([first], infos)
+            try:
+                first = next(infos)
+                if isinstance(first, RenderedInfo) and first.height >= self._layout_tracker._state.remaining_page_height:
+                    self._flush_to_new_screen()
+                    infos = renderables[i].render(self.previous_rendered, self._layout_tracker.current_state)
+                else:
+                    infos = chain([first], infos)
+            except StopIteration:
+                pass
 
             for info in infos:
                 if isinstance(info, Renderable):
