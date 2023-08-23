@@ -62,7 +62,7 @@ class Listing(Renderable):
 
     def set_text(self, text: str):
         def create_paragraph() -> Paragraph:
-            paragraph = Paragraph(self.parent, True)
+            paragraph = Paragraph(self.parent)
             paragraph.style = "Code"
             return paragraph
 
