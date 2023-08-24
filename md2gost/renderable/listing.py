@@ -29,14 +29,19 @@ class DocxParagraphPygmentsFormatter(Formatter):
         for token, style in self.style:
             self._styles[token] = style
 
+    def _add_run_to_last_paragraph(self, text, style):
+        self._paragraphs[-1].add_run(text, style["bold"] or None, style["italic"] in style or None,
+                                     RGBColor.from_string(style['color']) if style['color'] else None)
+
     def format(self, tokensource, outfile):
         self._paragraphs.append(self._creator())
         for ttype, value in tokensource:
-            if value == "\n":
-                self._paragraphs.append(self._creator())
             style = self._styles[ttype]
-            self._paragraphs[-1].add_run(value.removesuffix("\n"), style["bold"] or None, style["italic"] in style or None,
-                                    RGBColor.from_string(style['color']) if style['color'] else None)
+            lines = iter(value.split("\n"))
+            self._add_run_to_last_paragraph(next(lines), style)
+            for line in lines:
+                self._paragraphs.append(self._creator())
+                self._add_run_to_last_paragraph(line, style)
         self._paragraphs.pop(-1)  # remove last empty line
 
 
