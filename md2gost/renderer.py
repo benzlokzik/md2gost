@@ -61,7 +61,8 @@ class Renderer:
                     self.previous_rendered = info
 
         self._flush_to_new_screen()
-        self._debugger.after_rendered()
+        if self._debugger:
+            self._debugger.after_rendered()
 
     def _flush_to_new_screen(self):
         while self._to_new_page:
