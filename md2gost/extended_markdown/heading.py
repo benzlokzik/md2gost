@@ -10,7 +10,7 @@ class Heading(BlockElement):
 
     Asterisk before text means that headings is unnumbered"""
 
-    priority = 7
+    priority = 6
     pattern = re.compile(
         r" {0,3}(#{1,6})((?=\s)[^\n]*?|[^\n\S]*)(?:(?<=\s)(?<!\\)#+)?[^\n\S]*$\n?",
         flags=re.M,
