@@ -31,6 +31,8 @@ class Heading(Paragraph):
 
         self._rendered_page = 0
 
+        # todo: add bookmark here
+
     @property
     def rendered_page(self) -> int:
         return self._rendered_page
@@ -76,6 +78,8 @@ class Heading(Paragraph):
             height = height_data.full - height_data.before
         else:
             height = height_data.full
+            if layout_state.current_page_height == 0 and layout_state.page != 1:
+                height -= height_data.before
 
         layout_state.add_height(height)
         self._rendered_page = layout_state.page
