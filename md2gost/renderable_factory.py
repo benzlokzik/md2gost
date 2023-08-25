@@ -83,7 +83,7 @@ class RenderableFactory:
     @create.register
     @staticmethod
     def _(marko_list: extended_markdown.List, parent: Parented):
-        list_ = List(parent)
+        list_ = List(parent, marko_list.ordered)
 
         def create_items_from_marko(marko_list_, level=1):
             for list_item in marko_list_.children:
@@ -91,7 +91,10 @@ class RenderableFactory:
                     if isinstance(child, extended_markdown.List):
                         create_items_from_marko(child, level + 1)
                     elif isinstance(child, extended_markdown.Paragraph):
-                        list_.add_item(child.children[0].children, level, marko_list_.ordered)
+                        RenderableFactory._create_runs(
+                            list_.add_item(level),
+                            child.children
+                        )
 
         create_items_from_marko(marko_list)
 
