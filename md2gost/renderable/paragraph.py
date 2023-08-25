@@ -74,21 +74,44 @@ class Paragraph(Renderable):
             if layout_state.current_page_height == 0 and layout_state.page > 1:
                 height_data.before = 0
 
+            # height = 0
+            # base_line_height = height_data.before + ((lines - 1) * height_data.line_spacing + 1) * height_data.line_height
+            # for lines in range(height_data.lines):
+            #     if base_height <\
+            #             layout_state.remaining_page_height:
+            #         height += base_height
+            #         layout_state.add_height(base_height)
+            #         height += min(height_data.after, layout_state.remaining_page_height)
+            #     else:
+            #         if height_data.
+
             if layout_state.current_page_height + height_data.before + height_data.base <= layout_state.max_height <\
                     layout_state.current_page_height + height_data.before + height_data.base + height_data.after:
                 # height without space_after fits but with space_after doesn't, so height is remaining page space
-                height = layout_state.max_height - layout_state.current_page_height
-            elif height_data.lines > 1 and\
-                    layout_state.current_page_height + height_data.before + height_data.line_height <= layout_state.max_height <\
-                    layout_state.current_page_height + height_data.base:
-                # first line without line_spacing and space_after first but rest doesn't, so take all remaining space and
-                # full height
-                height = layout_state.max_height - layout_state.current_page_height + height_data.full
-            elif layout_state.current_page_height + height_data.before + height_data.base > layout_state.max_height:
-                # still doesn't fit, so take remaining space and full height
-                height = layout_state.max_height - layout_state.current_page_height + height_data.full
+                height = layout_state.remaining_page_height
+            elif layout_state.current_page_height + height_data.base <= layout_state.max_height:
+                height = min(height_data.full, layout_state.remaining_page_height)
             else:
-                height = height_data.full
+                # still doesn't fit, so take remaining space and full height
+                fitting_lines = 0
+                for lines in range(1, height_data.lines):
+                    if height_data.before + ((lines - 1) * height_data.line_spacing + 1) * height_data.line_height \
+                            > layout_state.remaining_page_height:
+                        break
+                    fitting_lines += 1
+
+                if fitting_lines <= 1:
+                    # if only no or only one line fits the page, paragraph goes to the next page
+                    height = layout_state.remaining_page_height + height_data.full
+                elif height_data.lines-fitting_lines == 1:
+                    # if all lines except last fit the page, the last two lines go to the new page
+                    height = layout_state.remaining_page_height + \
+                             height_data.before + height_data.line_height * height_data.line_spacing * 2 \
+                             + height_data.after
+                else:
+                    height = layout_state.remaining_page_height + \
+                             height_data.before + height_data.line_height * height_data.line_spacing * \
+                             (height_data.lines-fitting_lines) + height_data.after
 
             yield (previous_rendered := RenderedInfo(self._docx_paragraph, False, Length(height)))
             layout_state.add_height(height)
