@@ -7,7 +7,7 @@ class InlineFormula(InlineElement):
 
     Syntax: \\( y = x \\)"""
 
-    pattern = r"[\\\(,$](.*?)[\\\),$]"
+    pattern = r"\$(.*?)\$"
     priority = 8
 
     def __init__(self, match: Match[str]):
