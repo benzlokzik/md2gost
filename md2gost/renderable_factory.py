@@ -6,6 +6,7 @@ from docx.shared import Parented, RGBColor
 from .renderable import *
 from .renderable import Renderable
 from . import extended_markdown
+from .renderable.table import Table
 from .renderable.caption import Caption
 from .renderable.formula import Formula
 from .renderable.heading import Heading
@@ -101,6 +102,20 @@ class RenderableFactory:
         create_items_from_marko(marko_list)
 
         return list_
+
+    @create.register
+    @staticmethod
+    def _(marko_table: extended_markdown.Table, parent: Parented):
+        table = Table(parent, len(marko_table.children), len(marko_table.children[0].children))
+
+        for i, row in enumerate(marko_table.children):
+            for j, cell in enumerate(row.children):
+                RenderableFactory._create_runs(
+                    table.add_paragraph_to_cell(i, j),
+                    cell.children
+                )
+
+        return table
 
     @create.register
     @staticmethod
