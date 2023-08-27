@@ -161,6 +161,8 @@ class ParagraphSizer:
             font = Font(run_docx_font.name, run_docx_font.bold, run_docx_font.italic, run_docx_font.size.pt)
 
             run_text = run.text
+            if run_text == "" and run._element.xpath("w:noBreakHyphen"):
+                run_text = "-"
             if i == len(runs) - 1:
                 run_text += " "  # add space to the end of the last run, so it adds the last word
 

@@ -23,10 +23,16 @@ class Paragraph(Renderable):
         self._images: list[Image] = []
 
     def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None):
-        docx_run = self._docx_paragraph.add_run(text)
-        docx_run.bold = is_bold
-        docx_run.italic = is_italic
-        docx_run.font.color.rgb = color
+        # replace all hyphens with non breaking hyphens
+        parts = text.split("-")
+        for i, part in enumerate(parts):
+            docx_run = self._docx_paragraph.add_run(part)
+            docx_run.bold = is_bold
+            docx_run.italic = is_italic
+            docx_run.font.color.rgb = color
+            if i != len(parts)-1:
+                self._docx_paragraph.add_run()._element.\
+                    append(create_element("w:noBreakHyphen"))
 
     def add_image(self, path: str):
         self._images.append(Image(self._parent, path))
