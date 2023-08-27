@@ -68,7 +68,7 @@ class Table(Renderable):
                 docx_row._element.append(docx_cell._element)
             # paragraph_rendered_info = next(paragraph.render(previous, table_row_layout_state))
 
-            row_height += Pt(0.5)  # border
+            # row_height += Pt(0.5)  # border
 
             if row_height > layout_state.remaining_page_height:
                 table_rendered_info = RenderedInfo(docx_table, False, table_height)
