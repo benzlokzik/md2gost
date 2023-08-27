@@ -62,6 +62,8 @@ class ToC(Renderable):
         numbering = [0 for _ in range(10)]
         for level, title, page in self._items:
             numbering[level-1] += 1
+            for i in range(level, len(numbering)):
+                numbering[i] = 0
             p.add_run("    "*(level-1))
             p.add_run(".".join([str(x) for x in numbering[:level]])+". ")
             p.add_run(title)
