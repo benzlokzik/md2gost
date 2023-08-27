@@ -63,10 +63,7 @@ class Image(Renderable):
         if layout_state.remaining_page_height < height:
             height += layout_state.remaining_page_height
 
-        yield (rendered_image := RenderedInfo(
-            self._docx_paragraph,
-            self._image.height > layout_state.remaining_page_height,
-            Length(height)))
+        yield (rendered_image := RenderedInfo(self._docx_paragraph, Length(height)))
 
         layout_state.add_height(rendered_image.height)
 
