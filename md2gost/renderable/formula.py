@@ -77,4 +77,4 @@ class Formula(Renderable):
         if height > layout_state.remaining_page_height:
             height += layout_state.remaining_page_height
 
-        yield RenderedInfo(self._table, False, height)
+        yield RenderedInfo(self._table, height)

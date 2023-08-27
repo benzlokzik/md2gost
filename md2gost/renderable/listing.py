@@ -109,7 +109,7 @@ class Listing(Renderable):
             paragraph_rendered_info = next(paragraph.render(previous, paragraph_layout_state))
 
             if paragraph_rendered_info.height > layout_state.remaining_page_height:  # todo add before after
-                table_rendered_info = RenderedInfo(table, False, table_height)
+                table_rendered_info = RenderedInfo(table, table_height)
                 yield table_rendered_info
 
                 table_height = Pt(1)  # table borders, 4 eights of point for each border
@@ -147,4 +147,4 @@ class Listing(Renderable):
 
             previous = paragraph_rendered_info
 
-        yield RenderedInfo(table, False, table_height)
+        yield RenderedInfo(table, table_height)

@@ -103,7 +103,7 @@ class Paragraph(Renderable):
                          height_data.before + height_data.line_height * height_data.line_spacing * \
                          (height_data.lines-fitting_lines) + height_data.after
 
-            yield (previous_rendered := RenderedInfo(self._docx_paragraph, False, Length(height)))
+            yield (previous_rendered := RenderedInfo(self._docx_paragraph, Length(height)))
             layout_state.add_height(height)
 
         images = iter(self._images)

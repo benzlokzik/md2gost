@@ -94,4 +94,4 @@ class Heading(Paragraph):
         layout_state.add_height(height)
         self._rendered_page = layout_state.page
 
-        yield RenderedInfo(self._docx_paragraph, False, Length(height))
+        yield RenderedInfo(self._docx_paragraph, Length(height))

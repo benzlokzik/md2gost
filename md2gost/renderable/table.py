@@ -71,7 +71,7 @@ class Table(Renderable):
             # row_height += Pt(0.5)  # border
 
             if row_height > layout_state.remaining_page_height:
-                table_rendered_info = RenderedInfo(docx_table, False, table_height)
+                table_rendered_info = RenderedInfo(docx_table, table_height)
                 yield table_rendered_info
 
                 table_height = Pt(1)  # table borders, 4 eights of point for each border
@@ -105,4 +105,4 @@ class Table(Renderable):
 
             # previous = paragraph_rendered_info
 
-        yield RenderedInfo(docx_table, False, table_height)
+        yield RenderedInfo(docx_table, table_height)

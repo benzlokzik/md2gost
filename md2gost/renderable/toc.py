@@ -73,5 +73,5 @@ class ToC(Renderable):
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
             -> Generator[RenderedInfo | Renderable, None, None]:
         for rendered_info in self._paragraph.render(previous_rendered, copy(layout_state)):
-            yield RenderedInfo(rendered_info.docx_element, False, 0)
+            yield RenderedInfo(rendered_info.docx_element, 0)
         yield from Break(self._parent).render(None, copy(layout_state))

@@ -45,5 +45,5 @@ class Caption(Renderable):
                 layout_state.max_width
             ).calculate_height()
 
-        yield RenderedInfo(self._docx_paragraph, False, height_data.full)
+        yield RenderedInfo(self._docx_paragraph, height_data.full)
 
