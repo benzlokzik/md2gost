@@ -2,7 +2,7 @@ from copy import copy
 import os
 from typing import Generator, Callable
 
-from docx.shared import Length, Pt, RGBColor
+from docx.shared import Length, Pt, RGBColor, Twips
 from docx.table import Table
 
 from pygments import highlight
@@ -45,7 +45,7 @@ class DocxParagraphPygmentsFormatter(Formatter):
         self._paragraphs.pop(-1)  # remove last empty line
 
 
-LISTING_OFFSET = Pt(31)
+LISTING_OFFSET = Pt(31) - Twips(108*2)  # todo: fix
 
 
 class Listing(Renderable):
@@ -61,7 +61,12 @@ class Listing(Renderable):
         ]), parent)
         table.style = "Table Grid"
         table.add_row()
-        table.add_column(width)
+
+        # todo: style inheritance
+        left_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+        right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+
+        table.add_column(width+left_margin+right_margin)
         table.rows[0].cells[0]._element.remove(table.rows[0].cells[0].paragraphs[0]._element)
         return table
 

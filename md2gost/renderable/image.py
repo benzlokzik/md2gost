@@ -1,3 +1,4 @@
+import logging
 from copy import copy
 from io import BytesIO
 from typing import Generator
@@ -22,6 +23,7 @@ class Image(Renderable):
         self._docx_paragraph.paragraph_format.first_line_indent = 0
         self._docx_paragraph.paragraph_format.line_spacing = 1
         self._docx_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+        self._invalid = False
 
         run = self._docx_paragraph.add_run()
 
@@ -30,12 +32,20 @@ class Image(Renderable):
             bytesio.write(requests.get(path).content)
             self._image = run.add_picture(bytesio)
         else:
-            self._image = run.add_picture(path)
+            try:
+                self._image = run.add_picture(path)
+            except FileNotFoundError:
+                logging.warning(f"Invalid image path: {path}, skipping...")
+                self._invalid = True
 
         self._caption = Caption(parent, "Рисунок", "hello")
         self._caption.center()
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
+        if self._invalid:
+            yield from []
+            return
+
         # limit width
         if self._image.width > layout_state.max_width:
             height_by_width = self._image.height / self._image.width

@@ -1,7 +1,7 @@
 from copy import copy
 from typing import Generator
 
-from docx.shared import Parented, Length, Pt
+from docx.shared import Parented, Length, Pt, Twips
 from docx.table import _Row as DocxRow, _Cell as DocxCell, Table as DocxTable
 
 from . import Paragraph
@@ -12,7 +12,7 @@ from ..rendered_info import RenderedInfo
 from ..util import create_element
 
 
-CELL_OFFSET = Pt(10)
+CELL_OFFSET = Pt(9) - Twips(108*2)
 
 
 class Table(Renderable):
@@ -20,7 +20,12 @@ class Table(Renderable):
         self._parent = parent
         self._cols = cols
         sect = parent.part.document.sections[0]
-        self._table_width = sect.page_width - sect.left_margin - sect.right_margin
+
+        # todo: style inheritance
+        left_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+        right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+
+        self._table_width = sect.page_width - sect.left_margin - sect.right_margin + left_margin + right_margin
 
         self._rows: list[list[list[Paragraph]]] = [[[] for i in range(cols)] for j in range(rows)]
 
@@ -63,7 +68,7 @@ class Table(Renderable):
                 docx_row._element.append(docx_cell._element)
             # paragraph_rendered_info = next(paragraph.render(previous, table_row_layout_state))
 
-            row_height += Pt(1)  # border
+            row_height += Pt(0.5)  # border
 
             if row_height > layout_state.remaining_page_height:
                 table_rendered_info = RenderedInfo(docx_table, False, table_height)

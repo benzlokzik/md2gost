@@ -3,7 +3,7 @@ from typing import Generator
 
 import latex2mathml.converter
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
-from docx.shared import Pt
+from docx.shared import Pt, Twips
 from docx.table import Table
 from docx.text.run import Run
 from lxml import etree
@@ -32,7 +32,12 @@ class Formula(Renderable):
             raise ValueError(f"Can't parse the formula:\n{latex_formula}")
 
         sect = parent.part.document.sections[0]
-        document_width = sect.page_width - sect.right_margin - sect.left_margin
+
+        # todo: style inheritance
+        left_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+        right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+
+        table_width = sect.page_width - sect.right_margin - sect.left_margin + left_margin + right_margin
 
         self._table = table = Table(create_element("w:tbl", [
             create_element("w:tblGrid")
@@ -40,7 +45,7 @@ class Formula(Renderable):
 
         row = table.add_row()
         right_cell_width = Pt(30)
-        table.add_column(document_width - right_cell_width)
+        table.add_column(table_width - right_cell_width)
         table.add_column(right_cell_width)
         left_cell = table.cell(0,0)
         right_cell = table.cell(0,1)

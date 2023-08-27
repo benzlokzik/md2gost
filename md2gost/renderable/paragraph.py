@@ -111,7 +111,8 @@ class Paragraph(Renderable):
         for image in images:
             rendered_image = list(image.render(previous_rendered, copy(layout_state)))
             rendered_image_height = sum([x.height for x in rendered_image])
-            previous_rendered = rendered_image[-1]
+            if rendered_image:
+                previous_rendered = rendered_image[-1]
             if rendered_image_height <= layout_state.remaining_page_height:
                 yield from rendered_image
                 layout_state.add_height(rendered_image_height)
