@@ -19,13 +19,18 @@ class List(Renderable):
         self._paragraphs: list[Paragraph] = []
         self._last_paragraph_space_after = 0
 
+        self._numbering = [0 for _ in range(10)]
+
     def add_item(self, level: int) -> Paragraph:
+        self._numbering[level - 1] += 1
+        for i in range(level, len(self._numbering)):
+            self._numbering[i] = 0
+
         paragraph = Paragraph(self._parent)
-        paragraph.style = f"List Number{' '+str(level) if level>1 else ''}" if self._ordered else "List Bullet"
+        paragraph.add_run((f"{self._numbering[level-1]}." if self._ordered else "●")+"   ")
 
         # first level indent is a first_line_indent of normal text
         first_indent = self._parent.part.styles["Normal"].paragraph_format.first_line_indent
-        # first_indent = 0
 
         # idk how it works but it works
         paragraph._docx_paragraph.paragraph_format.tab_stops.add_tab_stop(Twips(360))
