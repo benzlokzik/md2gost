@@ -36,6 +36,8 @@ class RenderableFactory:
                 paragraph.add_run(child.children, is_italic=True)
             elif isinstance(child, extended_markdown.Image):
                 paragraph.add_image(child.dest)
+            elif isinstance(child, extended_markdown.LineBreak):
+                pass  # ignore
             elif isinstance(child, (extended_markdown.Link, extended_markdown.Url)):
                 paragraph.add_link(child.children[0].children,
                                    child.dest,
