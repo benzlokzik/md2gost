@@ -24,6 +24,5 @@ class Break(Renderable):
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         yield RenderedInfo(
             self._docx_paragraph,
-            False,
             max(layout_state.remaining_page_height, ParagraphSizer(self._docx_paragraph, None, layout_state.max_width).calculate_height().line_height)
         )
