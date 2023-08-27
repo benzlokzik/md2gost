@@ -22,7 +22,8 @@ class Paragraph(Renderable):
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
         self._images: list[Image] = []
 
-    def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None):
+    def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None,
+                strike_through: bool = None):
         # replace all hyphens with non breaking hyphens
         parts = text.split("-")
         for i, part in enumerate(parts):
@@ -30,6 +31,7 @@ class Paragraph(Renderable):
             docx_run.bold = is_bold
             docx_run.italic = is_italic
             docx_run.font.color.rgb = color
+            docx_run.font.strike = strike_through
             if i != len(parts)-1:
                 self._docx_paragraph.add_run()._element.\
                     append(create_element("w:noBreakHyphen"))

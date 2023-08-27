@@ -31,8 +31,9 @@ class RenderableFactory:
         for child in children:
             if isinstance(child, (extended_markdown.RawText, extended_markdown.Literal)):
                 paragraph.add_run(child.children,
-                                  extended_markdown.StrongEmphasis in classes or None,
-                                  extended_markdown.Emphasis in classes or None)
+                                  is_bold=extended_markdown.StrongEmphasis in classes or None,
+                                  is_italic=extended_markdown.Emphasis in classes or None,
+                                  strike_through=extended_markdown.Strikethrough in classes or None)
             elif isinstance(child, extended_markdown.CodeSpan):
                 paragraph.add_run(child.children, is_italic=True)
             elif isinstance(child, extended_markdown.Image):
@@ -44,7 +45,7 @@ class RenderableFactory:
                                    child.dest,
                                    extended_markdown.StrongEmphasis in classes or None,
                                    extended_markdown.Emphasis in classes or None)
-            elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis)):
+            elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis, extended_markdown.Strikethrough)):
                 RenderableFactory._create_runs(paragraph, child.children, classes+[type(child)])
             else:
                 paragraph.add_run(f" {child.get_type()} is not supported ", color=RGBColor.from_string("FF0000"))
