@@ -61,7 +61,10 @@ class Heading(Paragraph):
         if self._level == 1 and layout_state.page != 1 and\
                 not (isinstance(previous_rendered.docx_element, DocxParagraph)
                      and previous_rendered.docx_element.text == "\n"):
-            yield from Break(self._parent).render(previous_rendered, copy(layout_state))
+            break_rendered_info = list(
+                Break(self._parent).render(previous_rendered, copy(layout_state)))
+            if sum([x.height for x in break_rendered_info]) <= layout_state.remaining_page_height:
+                yield from break_rendered_info
 
         height_data = ParagraphSizer(
             self._docx_paragraph,
@@ -72,10 +75,17 @@ class Heading(Paragraph):
         # if a heading + 2 lines don't fit to the page, they go to the next page
         if ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
                 > layout_state.remaining_page_height:
-            # force this behaviour as there could be a table or an image instead of text
-            yield from Break(self._parent).render(previous_rendered, copy(layout_state))
             self._docx_paragraph.paragraph_format.space_before = 0  # libreoffice fix
             height = height_data.full - height_data.before
+
+            # force this behaviour as there could be a table or an image instead of text
+            break_rendered_info = list(
+                Break(self._parent).render(previous_rendered, copy(layout_state)))
+            if sum([x.height for x in break_rendered_info]) <= layout_state.remaining_page_height:
+                yield from break_rendered_info
+            else:
+                height += layout_state.remaining_page_height
+
         else:
             height = height_data.full
             if layout_state.current_page_height == 0 and layout_state.page != 1:
