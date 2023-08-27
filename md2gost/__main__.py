@@ -24,7 +24,7 @@ def main():
     parser.add_argument("--syntax-highlighting", help="Подсветка синтаксиса в листингах",
                         action=BooleanOptionalAction)
     parser.add_argument("--debug", help="Добавляет отладочные данные в документ",
-                        action=BooleanOptionalAction)
+                        action="store_true")
 
     args = parser.parse_args()
     filename, output, template, title, debug = \
@@ -63,6 +63,7 @@ def main():
         "Создано при помощи https://github.com/witelokk/md2gost"
 
     document.save(output)
+    print(f"Generated document: {os.path.abspath(output)}")
 
     if debug:
         import platform
@@ -74,7 +75,6 @@ def main():
         else:                                   # linux variants
             import subprocess
             subprocess.call(('xdg-open', output))
-
 
 if __name__ == "__main__":
     main()
