@@ -90,8 +90,6 @@ class Paragraph(Renderable):
                         break
                     fitting_lines += 1
                 
-                print(self._docx_paragraph.text[:50], fitting_lines, height_data.lines - fitting_lines)
-
                 if fitting_lines <= 1 or (height_data.lines-fitting_lines == 1 and height_data.lines == 3):
                     # if only no or only one line fits the page, paragraph goes to the next page
                     height = layout_state.remaining_page_height + height_data.full
