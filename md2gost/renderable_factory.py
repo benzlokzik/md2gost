@@ -29,7 +29,7 @@ class RenderableFactory:
         if not classes:
             classes = []
         for child in children:
-            if isinstance(child, extended_markdown.RawText):
+            if isinstance(child, (extended_markdown.RawText, extended_markdown.Literal)):
                 paragraph.add_run(child.children,
                                   extended_markdown.StrongEmphasis in classes or None,
                                   extended_markdown.Emphasis in classes or None)
