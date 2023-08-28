@@ -2,13 +2,13 @@ from copy import copy
 import os
 from typing import Generator, Callable
 
+from docx.oxml import CT_Tbl
 from docx.shared import Length, Pt, RGBColor, Twips
 from docx.table import Table
 
 from pygments import highlight
 from pygments.formatter import Formatter
 from pygments.lexers import get_lexer_by_name
-from pygments.styles import get_style_by_name
 
 
 from .paragraph import Paragraph
@@ -16,8 +16,6 @@ from .break_ import Break
 from .renderable import Renderable
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
-from ..util import create_element
-
 
 class DocxParagraphPygmentsFormatter(Formatter):
     def __init__(self, paragraphs: list[Paragraph], creator: Callable[[],Paragraph], **options):
@@ -55,18 +53,13 @@ class Listing(Renderable):
         self.paragraphs: list[Paragraph] = []
 
     def _create_table(self, parent, width: Length):
-        table = Table(create_element("w:tbl", [
-            create_element("w:tblPr"),
-            create_element("w:tblGrid"),
-        ]), parent)
-        table.style = "Table Grid"
-        table.add_row()
-
         # todo: style inheritance
         left_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
         right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
 
-        table.add_column(width+left_margin+right_margin)
+        table = Table(CT_Tbl.new_tbl(1, 1, width+left_margin+right_margin), parent)
+        table.style = "Table Grid"
+
         table.rows[0].cells[0]._element.remove(table.rows[0].cells[0].paragraphs[0]._element)
         return table
 

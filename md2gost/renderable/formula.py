@@ -3,6 +3,7 @@ from typing import Generator
 
 import latex2mathml.converter
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+from docx.oxml import CT_Tbl
 from docx.shared import Pt, Twips
 from docx.table import Table
 from docx.text.run import Run
@@ -39,18 +40,14 @@ class Formula(Renderable):
 
         table_width = sect.page_width - sect.right_margin - sect.left_margin + left_margin + right_margin
 
-        self._table = table = Table(create_element("w:tbl", [
-            create_element("w:tblGrid")
-        ]), parent)
+        self._table = table = Table(CT_Tbl.new_tbl(1, 2, table_width), parent)
 
-        row = table.add_row()
-        right_cell_width = Pt(30)
-        table.add_column(table_width - right_cell_width)
-        table.add_column(right_cell_width)
         left_cell = table.cell(0,0)
         right_cell = table.cell(0,1)
-        # TODO: implement proper size
-        row.height = _HEIGHT
+        right_cell.width = Pt(30)
+        left_cell.width = table_width - right_cell.width
+
+        table.rows[0].height = _HEIGHT  # TODO: implement proper size
 
         left_paragraph = left_cell.paragraphs[0]
         left_paragraph.style = "Formula Content"
