@@ -34,6 +34,7 @@ class Table(Renderable):
         paragraph.first_line_indent = 0
         paragraph._docx_paragraph.paragraph_format.space_before = 0
         paragraph._docx_paragraph.paragraph_format.space_after = 0
+        paragraph._docx_paragraph.paragraph_format.line_spacing = 1
         self._rows[row][col].append(paragraph)
         return paragraph
 
@@ -49,7 +50,7 @@ class Table(Renderable):
             -> Generator[RenderedInfo | Renderable, None, None]:
         docx_table = self._create_table()
 
-        table_height = Pt(1)  # table borders, 4 eights of point for each border
+        table_height = Pt(0.5)  # top border
 
         for row in self._rows:
             docx_row = DocxRow(create_element("w:tr"), docx_table)
@@ -59,22 +60,23 @@ class Table(Renderable):
                 docx_cell.width = self._table_width / self._cols
                 cell_height = 0
                 for paragraph in row[i]:
-                    cell_layout_state = copy(layout_state)
+                    cell_layout_state = LayoutState(
+                        layout_state.max_height, layout_state.max_width
+                    )
                     cell_layout_state.max_width = self._table_width / self._cols - CELL_OFFSET
                     for paragraph_rendered_info in paragraph.render(None, cell_layout_state):
                         docx_cell._element.append(paragraph_rendered_info.docx_element._element)
                         cell_height += paragraph_rendered_info.height
                     row_height = max(cell_height, row_height)
                 docx_row._element.append(docx_cell._element)
-            # paragraph_rendered_info = next(paragraph.render(previous, table_row_layout_state))
 
-            # row_height += Pt(0.5)  # border
+            row_height += Pt(0.5)  # bottom row border
 
             if row_height > layout_state.remaining_page_height:
                 table_rendered_info = RenderedInfo(docx_table, table_height)
                 yield table_rendered_info
 
-                table_height = Pt(1)  # table borders, 4 eights of point for each border
+                table_height = Pt(0.5)  # top border
 
                 continuation_paragraph = Paragraph(self._parent)
                 continuation_paragraph.add_run("Продолжение таблицы")
