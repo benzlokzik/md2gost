@@ -11,7 +11,7 @@ from freetype import Face
 
 from docx.text.paragraph import Paragraph
 from docx.text.font import Font as DocxFont
-from docx.shared import Length, Pt
+from docx.shared import Length, Pt, Inches
 from docx.text.parfmt import ParagraphFormat
 from docx.styles.style import _ParagraphStyle
 
@@ -137,13 +137,14 @@ class ParagraphSizer:
                 break
         return contextual_spacing
 
-    def count_lines(self, runs: list[Run], max_width: Length, docx_font: DocxFont, first_line_indent: Length, is_mono: bool = False):
+    def count_lines(self, runs: list[Run], max_width: Length, docx_font: DocxFont, first_line_indent: Length,
+                    is_mono: bool = False):
         lines = 1
         line_width = first_line_indent
 
         space_width = Font(docx_font.name, docx_font.bold, docx_font.italic, docx_font.size.pt).get_text_width(" ")
         if not is_mono:
-            space_width *= 0.8
+            space_width *= 0.81
 
         word_part = ""
         word_parts_widths = [0]
