@@ -63,7 +63,9 @@ class Heading(Paragraph):
                      and previous_rendered.docx_element.text == "\n"):
             break_rendered_info = list(
                 Break(self._parent).render(previous_rendered, copy(layout_state)))
-            if sum([x.height for x in break_rendered_info]) <= layout_state.remaining_page_height:
+            break_height = sum([x.height for x in break_rendered_info])
+            if break_height <= layout_state.remaining_page_height:
+                layout_state.add_height(break_height)
                 yield from break_rendered_info
 
         height_data = ParagraphSizer(
@@ -71,6 +73,9 @@ class Heading(Paragraph):
             previous_rendered.docx_element
             if previous_rendered and isinstance(previous_rendered.docx_element, DocxParagraph) else None,
             layout_state.max_width).calculate_height()
+
+        if layout_state.current_page_height == 0 and layout_state.page != 1:
+            height_data.before = 0
 
         # if a heading + 2 lines don't fit to the page, they go to the next page
         if ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
@@ -88,8 +93,6 @@ class Heading(Paragraph):
 
         else:
             height = height_data.full
-            if layout_state.current_page_height == 0 and layout_state.page != 1:
-                height -= height_data.before
 
         layout_state.add_height(height)
         self._rendered_page = layout_state.page

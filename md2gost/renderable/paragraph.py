@@ -20,6 +20,7 @@ class Paragraph(Renderable):
     def __init__(self, parent: Parented):
         self._parent = parent
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
+        self._docx_paragraph.style = "Normal"
         self._images: list[Image] = []
 
     def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None,

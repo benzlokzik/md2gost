@@ -43,6 +43,10 @@ class Table(Renderable):
             create_element("w:tblGrid"),
         ]), self._parent)
         table.style = "Table Grid"
+        table._element.tblPr.append(create_element("w:tblW", {
+            "w:w": "0",
+            "w:type": "auto"
+        }))
         return table
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\

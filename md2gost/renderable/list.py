@@ -34,10 +34,11 @@ class List(Renderable):
 
         # idk how it works but it works
         paragraph._docx_paragraph.paragraph_format.tab_stops.add_tab_stop(Twips(360))
-        paragraph._docx_paragraph.paragraph_format.left_indent = (Twips(425) + first_indent + LEVEL_INDENT*(level-1))
+        paragraph._docx_paragraph.paragraph_format.left_indent = (Twips(425) + (first_indent or 0) + LEVEL_INDENT*(level-1))
         paragraph._docx_paragraph.paragraph_format.first_line_indent = -Twips(425)
 
         self._last_paragraph_space_after = paragraph._docx_paragraph.paragraph_format.space_after
+        paragraph._docx_paragraph.paragraph_format.space_before = 0
         paragraph._docx_paragraph.paragraph_format.space_after = 0
 
         self._paragraphs.append(paragraph)

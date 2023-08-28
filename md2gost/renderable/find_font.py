@@ -27,6 +27,8 @@ def __find_font_linux(name: str, bold: bool, italic: bool):
 
 @cache
 def find_font(name: str, bold: bool, italic: bool):
+    if not name:
+        raise ValueError("Invalid font")
     if platform == "linux":
         return __find_font_linux(name, bold, italic)
     else:
@@ -34,7 +36,7 @@ def find_font(name: str, bold: bool, italic: bool):
         return findfont(FontProperties(
             family=name,
             weight="bold" if bold else "normal",
-            style="italic" if italic else "normal"))
+            style="italic" if italic else "normal"), fallback_to_default=False)
 
 
 if __name__ == "__main__":
