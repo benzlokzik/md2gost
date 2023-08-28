@@ -1,6 +1,7 @@
 from copy import copy
 from typing import Generator
 
+from docx.oxml import CT_Tbl
 from docx.shared import Parented, Length, Pt, Twips
 from docx.table import _Row as DocxRow, _Cell as DocxCell, Table as DocxTable
 
@@ -38,15 +39,8 @@ class Table(Renderable):
         return paragraph
 
     def _create_table(self) -> DocxTable:
-        table = DocxTable(create_element("w:tbl", [
-            create_element("w:tblPr"),
-            create_element("w:tblGrid"),
-        ]), self._parent)
+        table = DocxTable(CT_Tbl.new_tbl(0, self._cols, self._table_width), self._parent)
         table.style = "Table Grid"
-        table._element.tblPr.append(create_element("w:tblW", {
-            "w:w": "0",
-            "w:type": "auto"
-        }))
         return table
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
