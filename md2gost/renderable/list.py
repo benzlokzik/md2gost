@@ -27,7 +27,7 @@ class List(Renderable):
             self._numbering[i] = 0
 
         paragraph = Paragraph(self._parent)
-        paragraph.add_run((f"{self._numbering[level-1]}." if self._ordered else "●")+"   ")
+        paragraph.add_run((f"{self._numbering[level-1]}." if self._ordered else "●")+"\t")
 
         # first level indent is a first_line_indent of normal text
         first_indent = self._parent.part.styles["Normal"].paragraph_format.first_line_indent
