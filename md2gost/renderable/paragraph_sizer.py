@@ -65,13 +65,11 @@ class Font:
     def get_line_height(self) -> Length:
         # TODO: make it work for all fonts
         if "Times" in str(self._face.family_name) and self._freetypefont.size == 14:
-            return Pt(16.1)
-        elif "Courier" in str(self._face.family_name) and self._freetypefont.size == 12:
+            return Pt(16.05)
+        if "Courier" in str(self._face.family_name) and self._freetypefont.size == 12:
             return Pt(13.59)
         else:
-            logging.warning(f"Not supported font {self._face.family_name} {self._freetypefont.size}, rendering may be incorrect")
             return Pt(self._face.size.height / 64)
-
     @cached_property
     def is_mono(self):
         self._face.load_char("i")
@@ -79,6 +77,7 @@ class Font:
         self._face.load_char("m")
         return i_width == self._face.glyph.advance.x
         # return self._face.glyph.bitmap.width
+
 
 
 @dataclass
