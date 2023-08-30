@@ -33,7 +33,7 @@ jobs:
         python -m pip install --upgrade pip
         python -m venv venv
         source venv/bin/activate
-        python install -m .
+        pip install -m .
     - name: Test with pytest
       run: |
         pytohn -m md2gost examples/example.md
