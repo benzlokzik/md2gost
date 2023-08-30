@@ -34,8 +34,9 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install .
-    - name: Test with pytest
+    - name: Run
       run: |
+        source venv/bin/activate
         python -m md2gost examples/example.md
     - uses: actions/upload-artifact@v3
       with:
