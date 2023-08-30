@@ -34,7 +34,7 @@ jobs:
     - name: Run
       run: |
         source venv/bin/activate
-        python -m md2gost examples/example.md
+        python -m md2gost --syntax-highlighting examples/example.md
     - uses: actions/upload-artifact@v3
       with:
         name: example
