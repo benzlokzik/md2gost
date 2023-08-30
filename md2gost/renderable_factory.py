@@ -8,7 +8,7 @@ from .renderable import Renderable
 from . import extended_markdown
 from .renderable.table import Table
 from .renderable.caption import Caption
-from .renderable.formula import Formula
+from .renderable.equation import Equation
 from .renderable.heading import Heading
 from .renderable.list import List
 from .renderable.toc import ToC
@@ -40,8 +40,8 @@ class RenderableFactory:
                 paragraph.add_image(child.dest)
             elif isinstance(child, extended_markdown.LineBreak):
                 pass  # ignore
-            elif isinstance(child, extended_markdown.InlineFormula):
-                paragraph.add_inline_formula(child.formula)
+            elif isinstance(child, extended_markdown.InlineEquation):
+                paragraph.add_inline_equation(child.latex_equation)
             elif isinstance(child, (extended_markdown.Link, extended_markdown.Url)):
                 paragraph.add_link(child.children[0].children,
                                    child.dest,
@@ -76,8 +76,8 @@ class RenderableFactory:
 
     @create.register
     @staticmethod
-    def _(marko_formula: extended_markdown.Formula, parent: Parented):
-        formula = Formula(parent, marko_formula.formula)
+    def _(marko_equation: extended_markdown.Equation, parent: Parented):
+        formula = Equation(parent, marko_equation.latex_equation)
         return formula
 
     @create.register

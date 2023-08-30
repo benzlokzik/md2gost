@@ -15,7 +15,7 @@ from ..latex_math import latex_to_omml
 _HEIGHT = Pt(50)
 
 
-class Formula(Renderable):
+class Equation(Renderable):
     def __init__(self, parent, latex_formula: str):
         word_math = latex_to_omml(latex_formula)
 

@@ -55,7 +55,7 @@ class Paragraph(Renderable):
 
         self._docx_paragraph._p.append(hyperlink)
 
-    def add_inline_formula(self, formula: str):
+    def add_inline_equation(self, formula: str):
         # omml = inline_omml(latex_to_omml(formula))
         # for r in omml.xpath("//m:r", namespaces=omml.nsmap):
         #     r.append(create_element("w:rPr", [

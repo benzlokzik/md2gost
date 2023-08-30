@@ -2,7 +2,7 @@ from marko.inline import InlineElement
 from re import Match
 
 
-class InlineFormula(InlineElement):
+class InlineEquation(InlineElement):
     """Represents inline formula element
 
     Syntax: \\( y = x \\)"""
@@ -11,4 +11,4 @@ class InlineFormula(InlineElement):
     priority = 6
 
     def __init__(self, match: Match[str]):
-        self.formula = match.group(1)
+        self.latex_equation = match.group(1)

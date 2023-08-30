@@ -12,22 +12,22 @@ from marko.block import BlockElement
 from marko.ext.gfm.elements import *
 
 from .caption import Caption
-from .formula import Formula
+from .equation import Equation
 from .heading import Heading
 from .reference import Reference
 from .table import Table
 from .toc import TOC
-from .inline_formula import InlineFormula
+from .inline_formula import InlineEquation
 
 Extension = MarkoExtension(
     elements=[
-        Formula,
+        Equation,
         Reference,
         Caption,
         Table,
         TOC,
         Heading,
-        InlineFormula
+        InlineEquation
     ]
 )
 
