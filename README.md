@@ -10,7 +10,7 @@
 
 ## Установка
 ```bash
-pip install git+https://github.com/witelokk/md2gost2.git@main
+pip install git+https://github.com/witelokk/md2gost.git@main
 ```
 
 ## Использование
