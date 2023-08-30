@@ -1,6 +1,5 @@
 from copy import copy
 from typing import Generator
-from dataclasses import dataclass
 
 from docx.shared import Length, Parented, RGBColor
 from docx.text.paragraph import Paragraph as DocxParagraph
@@ -14,6 +13,7 @@ from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
 from ..util import create_element
 from ..rendered_info import RenderedInfo
+from ..latex_math import latex_to_omml, inline_omml
 
 
 class Paragraph(Renderable):
@@ -54,6 +54,16 @@ class Paragraph(Renderable):
         hyperlink.append(run._element)
 
         self._docx_paragraph._p.append(hyperlink)
+
+    def add_inline_formula(self, formula: str):
+        # omml = inline_omml(latex_to_omml(formula))
+        # for r in omml.xpath("//m:r", namespaces=omml.nsmap):
+        #     r.append(create_element("w:rPr", [
+        #         create_element("w:sz", {"w:val": "24"}),
+        #         create_element("w:szCs", {"w:val": "24"}),
+        #     ]))
+        # self._docx_paragraph._element.append(omml)
+        self.add_run(formula, is_italic=True)
 
     @property
     def style(self):

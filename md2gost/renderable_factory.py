@@ -40,6 +40,8 @@ class RenderableFactory:
                 paragraph.add_image(child.dest)
             elif isinstance(child, extended_markdown.LineBreak):
                 pass  # ignore
+            elif isinstance(child, extended_markdown.InlineFormula):
+                paragraph.add_inline_formula(child.formula)
             elif isinstance(child, (extended_markdown.Link, extended_markdown.Url)):
                 paragraph.add_link(child.children[0].children,
                                    child.dest,

@@ -1,18 +1,15 @@
-import os
 from typing import Generator
 
-import latex2mathml.converter
 from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.oxml import CT_Tbl
 from docx.shared import Pt, Twips
 from docx.table import Table
-from docx.text.run import Run
-from lxml import etree
 
 from ..layout_tracker import LayoutState
 from ..renderable import Renderable
 from ..rendered_info import RenderedInfo
 from ..util import create_element
+from ..latex_math import latex_to_omml
 
 
 _HEIGHT = Pt(50)
@@ -20,17 +17,7 @@ _HEIGHT = Pt(50)
 
 class Formula(Renderable):
     def __init__(self, parent, latex_formula: str):
-        try:
-            mathml = latex2mathml.converter.convert(latex_formula)
-            tree = etree.fromstring(mathml)
-            xslt = etree.parse(
-                os.path.join(os.path.dirname(__file__), "mml2omml")
-            )
-            transform = etree.XSLT(xslt)
-            new_dom = transform(tree)
-            word_math = new_dom.getroot()
-        except Exception:
-            raise ValueError(f"Can't parse the formula:\n{latex_formula}")
+        word_math = latex_to_omml(latex_formula)
 
         sect = parent.part.document.sections[0]
 
