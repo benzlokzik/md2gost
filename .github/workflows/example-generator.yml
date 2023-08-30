@@ -33,10 +33,10 @@ jobs:
         python -m pip install --upgrade pip
         python -m venv venv
         source venv/bin/activate
-        pip install -m .
+        pip install .
     - name: Test with pytest
       run: |
-        pytohn -m md2gost examples/example.md
+        python -m md2gost examples/example.md
     - uses: actions/upload-artifact@v3
       with:
         name: example
