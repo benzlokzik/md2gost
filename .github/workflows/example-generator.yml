@@ -27,9 +27,6 @@ jobs:
       run: |
         echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
         sudo apt-get install ttf-mscorefonts-installer
-        sudo apt-get install fontforge
-        sudo apt-get install cabextract
-        wget https://gist.githubusercontent.com/maxwelleite/10774746/raw/ttf-vista-fonts-installer.sh -q -O - | sudo bash
         python -m pip install --upgrade pip
         python -m venv venv
         source venv/bin/activate

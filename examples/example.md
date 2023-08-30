@@ -11,8 +11,6 @@
 
 ### Заголовок 3-го уровня
 
-#### Заголовок 4-го уровня
-
 ## Ссылки
 
 Ссылки позволяют вставлять кликабельные адреса в текст. Например, вот ссылка на мой любимый поисковик: [Google](https://www.google.com).
@@ -21,7 +19,7 @@
 
 Иногда картинки говорят больше слов. Вот пример изображения:
 
-![Пример изображения](https://placeholder.com/150)
+![img_2.png](https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png)
 
 ## Таблица
 
