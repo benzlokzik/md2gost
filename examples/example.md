@@ -19,7 +19,7 @@
 
 Иногда картинки говорят больше слов. Вот пример изображения:
 
-![img_2.png](https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Placeholder_view_vector.svg/310px-Placeholder_view_vector.svg.png)
+![img.png](examples/img.png)
 
 ## Таблица
 
