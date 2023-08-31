@@ -23,6 +23,8 @@ def create_table(parent: Parented, rows: int, cols, width: Length, style="Table 
         deepcopy(parent.part.styles[style]._element.xpath("w:tblPr/w:tblBorders")[0]))
     for i in range(rows):
         for j in range(cols):
+            cell = table.cell(i, j)
+            cell._element.remove(cell.paragraphs[0]._element)
             table.cell(i, j)._element.tcPr.append(create_element("w:shd", {
                 "w:fill": "auto", "w:val": "clear"
             }))
