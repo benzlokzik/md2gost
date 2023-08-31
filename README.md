@@ -1,12 +1,12 @@
 # md2gost
 
-Скрипт для генерации docx отчетов в соответсвии с ГОСТ из markdown файла.
+Скрипт для генерации docx отчетов в соответствии с ГОСТ из markdown файла.
 
 ## Основные возможности
 - Генерация отчета;
 - Генерация ~~интерактивного~~(not yet) содержания;
 - ~~Поддержка сквозной нумерации и кросс-референсинга~~(not yet);
-- Автоматическая расстановка картинок, продолжений таблица и листингов и т.д.
+- Автоматическая расстановка картинок, продолжений таблиц и листингов и т.д.
 
 ## Пример
 Markdown-файл: [example.md](https://github.com/witelokk/md2gost/blob/main/examples/example.md).
@@ -15,7 +15,12 @@ Markdown-файл: [example.md](https://github.com/witelokk/md2gost/blob/main/ex
 
 ## Установка
 ```bash
-pip install git+https://github.com/witelokk/md2gost.git@main
+pip install --upgrade git+https://github.com/witelokk/md2gost.git@main
+```
+
+Если ваша система приняла стандарт [PEP 668](https://peps.python.org/pep-0668/), используйте [pipx](https://pypa.github.io/pipx/):
+```bash
+pipx install --upgrade git+https://github.com/witelokk/md2gost.git@main
 ```
 
 ## Использование
@@ -41,5 +46,5 @@ md2docx: error: the following arguments are required: filename
 ```
 
 ### Подсветка синтаксиса в листингах
-Используйте флаг --syntax-highlighting
+Используйте флаг ```--syntax-highlighting```
 
