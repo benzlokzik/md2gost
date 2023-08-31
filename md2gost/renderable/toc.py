@@ -6,7 +6,7 @@ from docx.shared import Parented, Pt
 from docx.text.run import Run
 
 from . import Paragraph
-from .break_ import Break
+from .page_break import PageBreak
 from .renderable import Renderable
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
@@ -74,4 +74,4 @@ class ToC(Renderable):
             -> Generator[RenderedInfo | Renderable, None, None]:
         for rendered_info in self._paragraph.render(previous_rendered, copy(layout_state)):
             yield RenderedInfo(rendered_info.docx_element, 0)
-        yield from Break(self._parent).render(None, copy(layout_state))
+        yield from PageBreak(self._parent).render(None, copy(layout_state))

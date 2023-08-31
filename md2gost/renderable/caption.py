@@ -10,7 +10,7 @@ from md2gost.renderable import Renderable
 from md2gost.rendered_info import RenderedInfo
 from .paragraph_sizer import ParagraphSizer
 from ..util import create_element
-from .break_ import Break
+from .page_break import PageBreak
 
 
 class Caption(Renderable):
@@ -36,7 +36,7 @@ class Caption(Renderable):
         # if two more lines don't fit, move it to the next page (so there is no only caption on the end of the page)
         if ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
                 > layout_state.remaining_page_height:
-            break_ = list(Break(self._parent).render(None, copy(layout_state)))
+            break_ = list(PageBreak(self._parent).render(None, copy(layout_state)))
             yield from break_
             layout_state.add_height(sum(x.height for x in break_))
             height_data = ParagraphSizer(

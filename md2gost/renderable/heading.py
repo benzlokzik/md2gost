@@ -5,7 +5,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.text.paragraph import Paragraph as DocxParagraph
 from docx.shared import Parented, Length
 
-from .break_ import Break
+from .page_break import PageBreak
 from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
 from .paragraph import Paragraph
@@ -62,7 +62,7 @@ class Heading(Paragraph):
                 not (isinstance(previous_rendered.docx_element, DocxParagraph)
                      and previous_rendered.docx_element.text == "\n"):
             break_rendered_info = list(
-                Break(self._parent).render(previous_rendered, copy(layout_state)))
+                PageBreak(self._parent).render(previous_rendered, copy(layout_state)))
             break_height = sum([x.height for x in break_rendered_info])
             if break_height <= layout_state.remaining_page_height < layout_state.max_height:
                 layout_state.add_height(break_height)
@@ -85,7 +85,7 @@ class Heading(Paragraph):
 
             # force this behaviour as there could be a table or an image instead of text
             break_rendered_info = list(
-                Break(self._parent).render(previous_rendered, copy(layout_state)))
+                PageBreak(self._parent).render(previous_rendered, copy(layout_state)))
             if sum([x.height for x in break_rendered_info]) <= layout_state.remaining_page_height:
                 yield from break_rendered_info
             else:

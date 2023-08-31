@@ -12,7 +12,7 @@ from pygments.lexers import get_lexer_by_name
 
 
 from .paragraph import Paragraph
-from .break_ import Break
+from .page_break import PageBreak
 from .renderable import Renderable
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
@@ -112,7 +112,7 @@ class Listing(Renderable):
                 continuation_paragraph.style = "Caption"
                 continuation_paragraph.first_line_indent = 0
 
-                break_ = Break(self.parent)
+                break_ = PageBreak(self.parent)
                 break_rendered_info = next(
                     break_.render(table_rendered_info, copy(layout_state)))
 

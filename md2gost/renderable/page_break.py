@@ -10,7 +10,7 @@ from ..util import create_element
 from .renderable import Renderable
 
 
-class Break(Renderable):
+class PageBreak(Renderable):
     def __init__(self, parent: Parented):
         self._docx_paragraph = DocxParagraph(create_element("w:p", [
             create_element("w:r", [
