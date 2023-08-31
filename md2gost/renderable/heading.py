@@ -64,7 +64,7 @@ class Heading(Paragraph):
             break_rendered_info = list(
                 Break(self._parent).render(previous_rendered, copy(layout_state)))
             break_height = sum([x.height for x in break_rendered_info])
-            if break_height <= layout_state.remaining_page_height:
+            if break_height <= layout_state.remaining_page_height < layout_state.max_height:
                 layout_state.add_height(break_height)
                 yield from break_rendered_info
 
