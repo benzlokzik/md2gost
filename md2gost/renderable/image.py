@@ -2,6 +2,8 @@ import logging
 from copy import copy
 from io import BytesIO
 from typing import Generator
+from os import environ
+import os.path
 
 import requests
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
@@ -33,7 +35,7 @@ class Image(Renderable):
             self._image = run.add_picture(bytesio)
         else:
             try:
-                self._image = run.add_picture(path)
+                self._image = run.add_picture(os.path.join(environ['WORKING_DIR'], os.path.expanduser(path)))
             except FileNotFoundError:
                 logging.warning(f"Invalid image path: {path}, skipping...")
                 self._invalid = True

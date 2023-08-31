@@ -36,6 +36,8 @@ def main():
         print("Error: filename must have md format")
         exit(1)
 
+    os.environ["WORKING_DIR"] = os.path.dirname(filename)
+
     if output:
         if not output.endswith(".docx"):
             print("Error: output must have docx format")
