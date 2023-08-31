@@ -9,8 +9,9 @@
 - Автоматическая расстановка картинок, продолжений таблица и листингов и т.д.
 
 ## Пример
-Markdown-файл: https://github.com/witelokk/md2gost/blob/main/examples/example.md
-Сгенерированный файл (комманда python -m md2gost example.md): https://nightly.link/witelokk/md2gost/workflows/example-generator/main/example.zip?h=f65c99d31a9379f44fcc6e923de4a735a271d5aa
+Markdown-файл: [example.md](https://github.com/witelokk/md2gost/blob/main/examples/example.md).
+
+Сгенерированный файл в zip архиве (комманда `python -m md2gost --syntax-highlighting example.md`): [example.zip](https://nightly.link/witelokk/md2gost/workflows/example-generator/main/example.zip?h=f65c99d31a9379f44fcc6e923de4a735a271d5aa).
 
 ## Установка
 ```bash
