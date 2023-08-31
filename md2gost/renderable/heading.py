@@ -17,6 +17,7 @@ class Heading(Paragraph):
     def __init__(self, parent: Parented, level: int, numbered: bool):
         super().__init__(parent)
 
+        self._numbered = numbered
         self._parent = parent
         self._level = level
 
@@ -32,6 +33,10 @@ class Heading(Paragraph):
         self._rendered_page = 0
 
         # todo: add bookmark here
+
+    @property
+    def is_numbered(self) -> bool:
+        return self._numbered
 
     @property
     def rendered_page(self) -> int:

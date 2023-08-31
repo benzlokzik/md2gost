@@ -46,11 +46,11 @@ class ToC(Renderable):
         self._paragraph = Paragraph(parent)
         self._paragraph._docx_paragraph.paragraph_format.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
         self._paragraph.first_line_indent = 0
-        self._items: list[tuple[int, str, int]] = []
+        self._items: list[tuple[int, str, int, bool]] = []
         pass
 
-    def add_item(self, level: int, title: str, page: int):
-        self._items.append((level, title, page))
+    def add_item(self, level: int, title: str, page: int, numbered: bool):
+        self._items.append((level, title, page, numbered))
 
     def fill(self):
         p = self._paragraph._docx_paragraph
@@ -60,12 +60,13 @@ class ToC(Renderable):
         p.paragraph_format.tab_stops.add_tab_stop(0, alignment=WD_TAB_ALIGNMENT.LEFT, leader=WD_TAB_LEADER.SPACES)
 
         numbering = [0 for _ in range(10)]
-        for level, title, page in self._items:
+        for level, title, page, numbered in self._items:
             numbering[level-1] += 1
             for i in range(level, len(numbering)):
                 numbering[i] = 0
             p.add_run("    "*(level-1))
-            p.add_run(".".join([str(x) for x in numbering[:level]])+". ")
+            if numbered:
+                p.add_run(".".join([str(x) for x in numbering[:level]])+". ")
             p.add_run(title)
             p.add_run(f"\t{page}")
             p.add_run("\n")
