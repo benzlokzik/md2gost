@@ -14,6 +14,7 @@ from pygments.lexers import get_lexer_by_name
 from .paragraph import Paragraph
 from .page_break import PageBreak
 from .renderable import Renderable
+from ..docx_elements import create_table
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
 
@@ -57,11 +58,7 @@ class Listing(Renderable):
         left_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
         right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
 
-        table = Table(CT_Tbl.new_tbl(1, 1, width+left_margin+right_margin), parent)
-        table.style = "Table Grid"
-
-        table.rows[0].cells[0]._element.remove(table.rows[0].cells[0].paragraphs[0]._element)
-        return table
+        return create_table(parent, 1, 1, width+left_margin+right_margin)
 
     def set_text(self, text: str):
         def create_paragraph() -> Paragraph:

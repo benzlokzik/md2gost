@@ -1,13 +1,12 @@
-from copy import copy
+from copy import copy, deepcopy
 from typing import Generator
 
-from docx.oxml import CT_Tbl
 from docx.shared import Parented, Length, Pt, Twips
-from docx.table import _Row as DocxRow, _Cell as DocxCell, Table as DocxTable
 
 from . import Paragraph
 from .page_break import PageBreak
 from .renderable import Renderable
+from ..docx_elements import *
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
 from ..util import create_element
@@ -39,23 +38,17 @@ class Table(Renderable):
         self._rows[row][col].append(paragraph)
         return paragraph
 
-    def _create_table(self) -> DocxTable:
-        table = DocxTable(CT_Tbl.new_tbl(0, self._cols, self._table_width), self._parent)
-        table.style = "Table Grid"
-        return table
-
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
             -> Generator[RenderedInfo | Renderable, None, None]:
-        docx_table = self._create_table()
+        docx_table = create_table(self._parent, 0, self._cols, self._table_width)
 
         table_height = Pt(0.5)  # top border
 
         for row in self._rows:
-            docx_row = DocxRow(create_element("w:tr"), docx_table)
+            docx_row = create_table_row(docx_table)
             row_height = 0
             for i in range(self._cols):
-                docx_cell = DocxCell(create_element("w:tc"), docx_row)
-                docx_cell.width = self._table_width / self._cols
+                docx_cell = create_table_cell(docx_row, self._table_width / self._cols)
                 cell_height = 0
                 for paragraph in row[i]:
                     cell_layout_state = LayoutState(
@@ -95,7 +88,7 @@ class Table(Renderable):
                 layout_state.add_height(continuation_rendered_info.height)
                 yield continuation_rendered_info
 
-                docx_table = self._create_table()
+                docx_table = create_table(self._parent, 0, self._cols, self._table_width)
 
                 # previous = None
 
