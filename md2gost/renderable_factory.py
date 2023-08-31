@@ -6,6 +6,7 @@ from docx.shared import Parented, RGBColor
 from .renderable import *
 from .renderable import Renderable
 from . import extended_markdown
+from .renderable.paragraph import Link
 from .renderable.table import Table
 from .renderable.caption import Caption
 from .renderable.equation import Equation
@@ -25,32 +26,33 @@ class RenderableFactory:
         return paragraph
 
     @staticmethod
-    def _create_runs(paragraph: Paragraph, children, classes: list[type] = None):
+    def _create_runs(paragraph_or_link: Paragraph | Link, children, classes: list[type] = None):
         if not classes:
             classes = []
         for child in children:
             if isinstance(child, (extended_markdown.RawText, extended_markdown.Literal)):
-                paragraph.add_run(child.children,
-                                  is_bold=extended_markdown.StrongEmphasis in classes or None,
-                                  is_italic=extended_markdown.Emphasis in classes or None,
-                                  strike_through=extended_markdown.Strikethrough in classes or None)
+                paragraph_or_link.add_run(child.children,
+                                          is_bold=extended_markdown.StrongEmphasis in classes or None,
+                                          is_italic=extended_markdown.Emphasis in classes or None,
+                                          strike_through=extended_markdown.Strikethrough in classes or None)
             elif isinstance(child, extended_markdown.CodeSpan):
-                paragraph.add_run(child.children, is_italic=True)
+                paragraph_or_link.add_run(child.children, is_italic=True)
             elif isinstance(child, extended_markdown.Image):
-                paragraph.add_image(child.dest)
+                paragraph_or_link.add_image(child.dest)
             elif isinstance(child, extended_markdown.LineBreak):
                 pass  # ignore
             elif isinstance(child, extended_markdown.InlineEquation):
-                paragraph.add_inline_equation(child.latex_equation)
+                paragraph_or_link.add_inline_equation(child.latex_equation)
             elif isinstance(child, (extended_markdown.Link, extended_markdown.Url)):
-                paragraph.add_link(child.children[0].children,
-                                   child.dest,
-                                   extended_markdown.StrongEmphasis in classes or None,
-                                   extended_markdown.Emphasis in classes or None)
-            elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis, extended_markdown.Strikethrough)):
-                RenderableFactory._create_runs(paragraph, child.children, classes+[type(child)])
+                RenderableFactory._create_runs(paragraph_or_link.add_link(child.dest),
+                                               child.children, classes)
+            elif isinstance(child, (extended_markdown.Emphasis, extended_markdown.StrongEmphasis,
+                                    extended_markdown.Strikethrough)):
+                RenderableFactory._create_runs(paragraph_or_link,
+                                               child.children, classes + [type(child)])
             else:
-                paragraph.add_run(f" {child.get_type()} is not supported ", color=RGBColor.from_string("FF0000"))
+                paragraph_or_link.add_run(f" {child.get_type()} is not supported ",
+                                          color=RGBColor.from_string("FF0000"))
                 logging.warning(f"{child.get_type()} is not supported")
 
     @create.register

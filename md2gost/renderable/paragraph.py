@@ -1,5 +1,5 @@
 from copy import copy
-from typing import Generator
+from typing import Generator, Any
 
 from docx.shared import Length, Parented, RGBColor
 from docx.text.paragraph import Paragraph as DocxParagraph
@@ -16,6 +16,36 @@ from ..rendered_info import RenderedInfo
 from ..latex_math import latex_to_omml, inline_omml
 
 
+class Link:
+    def __init__(self, url, docx_paragraph: DocxParagraph):
+        self._docx_paragraph = docx_paragraph
+        r_id = docx_paragraph.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+        self._hyperlink = create_element("w:hyperlink", {
+            "r:id": r_id
+        })
+
+    def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None,
+                    strike_through: bool = None):
+
+        parts = text.split("-")
+        for i, part in enumerate(parts):
+            docx_run = DocxRun(create_element("w:r"), self._docx_paragraph)
+            self._hyperlink.append(docx_run._element)
+            docx_run.text = text
+            docx_run.style = "Hyperlink"
+            docx_run.bold = is_bold
+            docx_run.italic = is_italic
+            docx_run.font.color.rgb = color
+            docx_run.font.strike = strike_through
+            if i != len(parts) - 1:
+                self._hyperlink.append(create_element("w:r", [create_element("w:noBreakHyphen")]))
+
+    @property
+    def element(self):
+        return self._hyperlink
+
+
 class Paragraph(Renderable):
     def __init__(self, parent: Parented):
         self._parent = parent
@@ -25,7 +55,7 @@ class Paragraph(Renderable):
 
     def add_run(self, text: str, is_bold: bool = None, is_italic: bool = None, color: RGBColor = None,
                 strike_through: bool = None):
-        # replace all hyphens with non breaking hyphens
+        # replace all hyphens with non-breaking hyphens
         parts = text.split("-")
         for i, part in enumerate(parts):
             docx_run = self._docx_paragraph.add_run(part)
@@ -40,20 +70,10 @@ class Paragraph(Renderable):
     def add_image(self, path: str):
         self._images.append(Image(self._parent, path))
 
-    def add_link(self, text: str, url: str, is_bold: bool = None, is_italic: bool = None):
-        r_id = self._parent.part.relate_to(url, RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
-
-        hyperlink = create_element("w:hyperlink", {
-            "r:id": r_id
-        })
-
-        run = DocxRun(create_element("w:r"), self._docx_paragraph)
-        run.text = text
-        run.style = "Hyperlink"
-
-        hyperlink.append(run._element)
-
-        self._docx_paragraph._p.append(hyperlink)
+    def add_link(self, url: str):
+        link = Link(url, self._docx_paragraph)
+        self._docx_paragraph._p.append(link.element)
+        return link
 
     def add_inline_equation(self, formula: str):
         # omml = inline_omml(latex_to_omml(formula))
