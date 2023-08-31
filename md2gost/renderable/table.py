@@ -4,12 +4,10 @@ from typing import Generator
 from docx.shared import Parented, Length, Pt, Twips
 
 from . import Paragraph
-from .page_break import PageBreak
 from .renderable import Renderable
 from ..docx_elements import *
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
-from ..util import create_element
 
 
 CELL_OFFSET = Pt(9) - Twips(108*2)
@@ -73,14 +71,7 @@ class Table(Renderable):
                 continuation_paragraph.add_run("Продолжение таблицы")
                 continuation_paragraph.style = "Caption"
                 continuation_paragraph.first_line_indent = 0
-
-                break_ = PageBreak(self._parent)
-                break_rendered_info = next(
-                    break_.render(table_rendered_info, copy(layout_state)))
-
-                if break_rendered_info.height <= layout_state.remaining_page_height:
-                    layout_state.add_height(break_rendered_info.height)
-                    yield break_rendered_info
+                continuation_paragraph.page_break_before = True
 
                 continuation_rendered_info = next(
                     continuation_paragraph.render(None, copy(layout_state)))

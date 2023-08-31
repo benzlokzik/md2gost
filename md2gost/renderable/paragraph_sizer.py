@@ -67,7 +67,7 @@ class Font:
         if "Times" in str(self._face.family_name) and self._freetypefont.size == 14:
             return Pt(16.05)
         if "Courier" in str(self._face.family_name) and self._freetypefont.size == 12:
-            return Pt(13.59)
+            return Pt(13.61)
         else:
             return Pt(self._face.size.height / 64)
     @cached_property

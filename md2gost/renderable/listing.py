@@ -12,7 +12,6 @@ from pygments.lexers import get_lexer_by_name
 
 
 from .paragraph import Paragraph
-from .page_break import PageBreak
 from .renderable import Renderable
 from ..docx_elements import create_table
 from ..layout_tracker import LayoutState
@@ -108,14 +107,7 @@ class Listing(Renderable):
                 continuation_paragraph.add_run("Продолжение листинга")
                 continuation_paragraph.style = "Caption"
                 continuation_paragraph.first_line_indent = 0
-
-                break_ = PageBreak(self.parent)
-                break_rendered_info = next(
-                    break_.render(table_rendered_info, copy(layout_state)))
-
-                if break_rendered_info.height <= layout_state.remaining_page_height:
-                    layout_state.add_height(break_rendered_info.height)
-                    yield break_rendered_info
+                continuation_paragraph.page_break_before = True
 
                 continuation_rendered_info = next(
                     continuation_paragraph.render(None, copy(layout_state)))

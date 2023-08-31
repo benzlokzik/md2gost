@@ -10,12 +10,12 @@ from md2gost.renderable import Renderable
 from md2gost.rendered_info import RenderedInfo
 from .paragraph_sizer import ParagraphSizer
 from ..util import create_element
-from .page_break import PageBreak
 
 
 class Caption(Renderable):
-    def __init__(self, parent: Parented, type_: str, text: str):
+    def __init__(self, parent: Parented, type_: str, text: str, before=True):
         self._parent = parent
+        self._before = before
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
 
         self._docx_paragraph.style = "Caption"
@@ -33,17 +33,16 @@ class Caption(Renderable):
             layout_state.max_width
         ).calculate_height()
 
-        # if two more lines don't fit, move it to the next page (so there is no only caption on the end of the page)
-        if ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
+        # if three more lines don't fit, move it to the next page (so there is no only caption on the end of the page)
+        if self._before and ((height_data.lines + 2 - 1) * height_data.line_spacing + 1) * height_data.line_height\
                 > layout_state.remaining_page_height:
-            break_ = list(PageBreak(self._parent).render(None, copy(layout_state)))
-            yield from break_
-            layout_state.add_height(sum(x.height for x in break_))
+            self._docx_paragraph.paragraph_format.page_break_before = True
             height_data = ParagraphSizer(
                 self._docx_paragraph,
                 None,
                 layout_state.max_width
             ).calculate_height()
 
-        yield RenderedInfo(self._docx_paragraph, height_data.full)
+        yield RenderedInfo(self._docx_paragraph, height_data.full + (layout_state.remaining_page_height
+                           if self._docx_paragraph.paragraph_format.page_break_before else 0))
 

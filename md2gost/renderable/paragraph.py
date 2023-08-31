@@ -86,6 +86,14 @@ class Paragraph(Renderable):
         self.add_run(formula, is_italic=True)
 
     @property
+    def page_break_before(self) -> bool:
+        return self._docx_paragraph.paragraph_format.page_break_before
+
+    @page_break_before.setter
+    def page_break_before(self, value: bool):
+        self._docx_paragraph.paragraph_format.page_break_before = value
+
+    @property
     def style(self):
         return self._docx_paragraph.style
 
@@ -103,6 +111,10 @@ class Paragraph(Renderable):
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
             -> Generator[RenderedInfo | Renderable, None, None]:
+        remaining_space = layout_state.remaining_page_height
+
+        if self.page_break_before:
+            layout_state.add_height(layout_state.remaining_page_height)
         if self._docx_paragraph.text or not self._images:
             height_data = ParagraphSizer(
                 self._docx_paragraph,
@@ -135,6 +147,9 @@ class Paragraph(Renderable):
                 height = layout_state.remaining_page_height + \
                          height_data.before + height_data.line_height * height_data.line_spacing * \
                          (height_data.lines-fitting_lines) + height_data.after
+
+            if self.page_break_before:
+                height += remaining_space
 
             yield (previous_rendered := RenderedInfo(self._docx_paragraph, Length(height)))
             layout_state.add_height(height)

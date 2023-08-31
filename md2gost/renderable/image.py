@@ -40,7 +40,7 @@ class Image(Renderable):
                 logging.warning(f"Invalid image path: {path}, skipping...")
                 self._invalid = True
 
-        self._caption = Caption(parent, "Рисунок", "hello")
+        self._caption = Caption(parent, "Рисунок", "hello", False)
         self._caption.center()
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
