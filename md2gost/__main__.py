@@ -19,16 +19,16 @@ def main():
     parser.add_argument("-o", "--output", help="Путь до сгенерированного \
                             файла")
     parser.add_argument("-t", "--template", help="Путь до шаблона .docx")
-    parser.add_argument("-T", "--title", help="Путь до файла титульной(-ых) \
-                            страниц(ы)")
+    # parser.add_argument("-T", "--title", help="Путь до файла титульной(-ых) \
+    #                         страниц(ы)")
     parser.add_argument("--syntax-highlighting", help="Подсветка синтаксиса в листингах",
                         action=BooleanOptionalAction)
     parser.add_argument("--debug", help="Добавляет отладочные данные в документ",
                         action="store_true")
 
     args = parser.parse_args()
-    filename, output, template, title, debug = \
-        args.filename, args.output, args.template, args.title, args.debug
+    filename, output, template, debug = \
+        args.filename, args.output, args.template, args.debug
     if args.syntax_highlighting:
         os.environ["SYNTAX_HIGHLIGHTING"] = "1"
 
@@ -53,12 +53,12 @@ def main():
 
     document = converter.document
 
-    if title:
-        title = Document(title)
-        title.add_page_break()
-        composer = Composer(title)
-        composer.append(document)
-        document = composer.doc
+    # if title:
+    #     title = Document(title)
+    #     title.add_page_break()
+    #     composer = Composer(title)
+    #     composer.append(document)
+    #     document = composer.doc
 
     document.core_properties.author = getuser()
     document.core_properties.comments =\
