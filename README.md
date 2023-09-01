@@ -33,6 +33,30 @@ md2docx: error: the following arguments are required: filename
 
 ## Фичи
 
+### Подписи рисунков, листингов, таблиц
+Рисунки:
+```markdown
+![](path/to/image "Caption text")
+```
+
+Таблицы:
+```markdown
+%uniquename Caption text
+| a | b | c |
+|---|---|---|
+| a | b | c |
+```
+
+Листинги:
+~~~markdown
+%uniquename Caption text
+```python
+print("hello world")
+```
+~~~
+
+`uniquename` - уникальное имя для ссылок.
+
 ### Заголовки для основных разделов
 Для того чтобы у заголовка не было сквозной нумерации (например для заголовка Содержание), используйте 
 ```markdown
