@@ -22,5 +22,5 @@ pygments = "^2.16.1"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
-[tools.poetry.scripts]
+[tool.poetry.scripts]
 md2gost = "md2gost.__main__.main"
