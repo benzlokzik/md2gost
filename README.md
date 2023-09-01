@@ -4,7 +4,7 @@
 
 ## Основные возможности
 - Генерация отчета;
-- ~~Добавление титульной страницы в формате docx~~;
+- ~~Добавление титульной страницы в формате docx~~(not yet);
 - Генерация ~~интерактивного~~(not yet) содержания;
 - Поддержка сквозной нумерации ~~и кросс-референсинга~~(not yet);
 - Автоматическая расстановка картинок, продолжений таблиц и листингов и т.д.
@@ -26,8 +26,7 @@ pipx install --upgrade git+https://github.com/witelokk/md2gost.git@main
 
 ## Использование
 ```
-python -m md2docx [-h] [-o OUTPUT] [-t TEMPLATE] [-T TITLE] [--syntax-highlighting | --no-syntax-highlighting] [--debug] filename
-md2docx: error: the following arguments are required: filename
+(python -m ) md2docx [-h] [-o OUTPUT] [-t TEMPLATE] [--syntax-highlighting | --no-syntax-highlighting] [--debug] filename
 ```
 
 При отсутствии флага -o, сгенерированый отчет будет иметь имя с названием исходного файла и расширением .md.
