@@ -6,9 +6,9 @@ from docx.shared import Parented, RGBColor
 from .renderable import *
 from .renderable import Renderable
 from . import extended_markdown
+from .renderable.caption import CaptionInfo
 from .renderable.paragraph import Link
 from .renderable.table import Table
-from .renderable.caption import Caption
 from .renderable.equation import Equation
 from .renderable.heading import Heading
 from .renderable.list import List
@@ -21,7 +21,7 @@ class RenderableFactory:
 
     @singledispatchmethod
     def create(self, marko_element: extended_markdown.BlockElement,
-               caption: extended_markdown.Caption = None) -> Renderable:
+               caption_info: CaptionInfo) -> Renderable:
         paragraph = Paragraph(self._parent)
         paragraph.add_run(f"{marko_element.get_type()} is not supported", color=RGBColor.from_string('ff0000'))
         logging.warning(f"{marko_element.get_type()} is not supported")
@@ -57,35 +57,31 @@ class RenderableFactory:
                                           color=RGBColor.from_string("FF0000"))
                 logging.warning(f"{child.get_type()} is not supported")
 
-    def _create_caption(self, marko_caption: extended_markdown.Caption, before: bool) -> Caption:
-        return Caption(self._parent, marko_caption.category, marko_caption.text,
-                       before)
-
     @create.register
-    def _(self, marko_paragraph: extended_markdown.Paragraph, caption: extended_markdown.Caption = None):
+    def _(self, marko_paragraph: extended_markdown.Paragraph, caption_info: CaptionInfo):
         paragraph = Paragraph(self._parent)
         RenderableFactory._create_runs(paragraph, marko_paragraph.children)
         return paragraph
 
     @create.register
-    def _(self, marko_heading: extended_markdown.Heading, caption: extended_markdown.Caption = None):
+    def _(self, marko_heading: extended_markdown.Heading, caption_info: CaptionInfo):
         heading = Heading(self._parent, marko_heading.level, marko_heading.numbered)
         RenderableFactory._create_runs(heading, marko_heading.children)
         return heading
 
     @create.register
-    def _(self, marko_code_block: extended_markdown.FencedCode | extended_markdown.CodeBlock, caption: extended_markdown.Caption = None):
-        listing = Listing(self._parent, marko_code_block.lang)
+    def _(self, marko_code_block: extended_markdown.FencedCode | extended_markdown.CodeBlock, caption_info: CaptionInfo):
+        listing = Listing(self._parent, marko_code_block.lang, caption_info)
         listing.set_text(marko_code_block.children[0].children)
         return listing
 
     @create.register
-    def _(self, marko_equation: extended_markdown.Equation, caption = None):
+    def _(self, marko_equation: extended_markdown.Equation, caption_info: CaptionInfo):
         formula = Equation(self._parent, marko_equation.latex_equation)
         return formula
 
     @create.register
-    def _(self, marko_list: extended_markdown.List, caption = None):
+    def _(self, marko_list: extended_markdown.List, caption_info: CaptionInfo):
         list_ = List(self._parent, marko_list.ordered)
 
         def create_items_from_marko(marko_list_, level=1):
@@ -104,8 +100,9 @@ class RenderableFactory:
         return list_
 
     @create.register
-    def _(self, marko_table: extended_markdown.Table, caption: Caption = None):
-        table = Table(self._parent, len(marko_table.children), len(marko_table.children[0].children))
+    def _(self, marko_table: extended_markdown.Table, caption_info: CaptionInfo):
+        table = Table(self._parent, len(marko_table.children), len(marko_table.children[0].children),
+                      caption_info)
 
         for i, row in enumerate(marko_table.children):
             for j, cell in enumerate(row.children):
@@ -117,6 +114,6 @@ class RenderableFactory:
         return table
 
     @create.register
-    def _(self, marko_toc: extended_markdown.TOC, caption: extended_markdown.Caption = None):
+    def _(self, marko_toc: extended_markdown.TOC, caption_info: CaptionInfo):
         toc = ToC(self._parent)
         return toc

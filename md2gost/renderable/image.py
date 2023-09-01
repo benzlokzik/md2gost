@@ -10,7 +10,7 @@ from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.shared import Parented, Length
 from docx.text.paragraph import Paragraph
 
-from .caption import Caption
+from .caption import Caption, CaptionInfo
 from .renderable import Renderable
 from .requires_numbering import RequiresNumbering
 from ..layout_tracker import LayoutState
@@ -76,7 +76,7 @@ class Image(Renderable, RequiresNumbering):
 
         layout_state.add_height(rendered_image.height)
 
-        caption = Caption(self._parent, "Рисунок", "", self._number, False)
+        caption = Caption(self._parent, "Рисунок", None, self._number, False)
         caption.center()
 
         yield from caption.render(rendered_image, copy(layout_state))

@@ -10,7 +10,7 @@ from pygments import highlight
 from pygments.formatter import Formatter
 from pygments.lexers import get_lexer_by_name
 
-from .caption import Caption
+from .caption import Caption, CaptionInfo
 from .paragraph import Paragraph
 from .renderable import Renderable
 from .requires_numbering import RequiresNumbering
@@ -50,8 +50,9 @@ LISTING_OFFSET = Pt(31) - Twips(108 * 2)  # todo: fix
 
 
 class Listing(Renderable, RequiresNumbering):
-    def __init__(self, parent, language: str):
+    def __init__(self, parent, language: str, caption_info: CaptionInfo):
         super().__init__("Листинг")
+        self._caption_info = caption_info
         self._language = language
         self._parent = parent
         self.paragraphs: list[Paragraph] = []
@@ -91,7 +92,7 @@ class Listing(Renderable, RequiresNumbering):
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
             -> Generator[RenderedInfo | SubRenderable, None, None]:
         caption_rendered_infos = list(
-            Caption(self._parent, "Листинг", "", self._number, True)
+            Caption(self._parent, "Листинг", self._caption_info, self._number, True)
             .render(previous_rendered, copy(layout_state))
         )
         layout_state.add_height(sum([info.height for info in caption_rendered_infos]))

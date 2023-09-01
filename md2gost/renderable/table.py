@@ -4,7 +4,7 @@ from typing import Generator
 from docx.shared import Parented, Length, Pt, Twips
 
 from . import Paragraph
-from .caption import Caption
+from .caption import Caption, CaptionInfo
 from .renderable import Renderable
 from .requires_numbering import RequiresNumbering
 from ..docx_elements import *
@@ -16,9 +16,10 @@ CELL_OFFSET = Pt(9) - Twips(108*2)
 
 
 class Table(Renderable, RequiresNumbering):
-    def __init__(self, parent: Parented, rows: int, cols: int):
-        super().__init__("Рисунок")
+    def __init__(self, parent: Parented, rows: int, cols: int, caption_info: CaptionInfo):
+        super().__init__("Таблица")
         self._parent = parent
+        self._caption_info = caption_info
         self._cols = cols
 
         sect = parent.part.document.sections[0]
@@ -41,13 +42,13 @@ class Table(Renderable, RequiresNumbering):
         self._rows[row][col].append(paragraph)
         return paragraph
 
-    def add_number(self, number):
+    def set_number(self, number):
         self._number = number
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
             -> Generator[RenderedInfo | SubRenderable, None, None]:
         caption_rendered_infos = list(
-            Caption(self._parent, "Таблица", "", self._number, True)
+            Caption(self._parent, "Таблица", self._caption_info, self._number, True)
             .render(previous_rendered, copy(layout_state))
         )
         layout_state.add_height(sum([info.height for info in caption_rendered_infos]))
