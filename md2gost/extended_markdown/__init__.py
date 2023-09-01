@@ -18,6 +18,7 @@ from .reference import Reference
 from .table import Table
 from .toc import TOC
 from .inline_formula import InlineEquation
+from .image import Image
 
 Extension = MarkoExtension(
     elements=[
@@ -27,7 +28,8 @@ Extension = MarkoExtension(
         Table,
         TOC,
         Heading,
-        InlineEquation
+        InlineEquation,
+        Image
     ]
 )
 

@@ -40,7 +40,7 @@ class RenderableFactory:
             elif isinstance(child, extended_markdown.CodeSpan):
                 paragraph_or_link.add_run(child.children, is_italic=True)
             elif isinstance(child, extended_markdown.Image):
-                paragraph_or_link.add_image(child.dest)
+                paragraph_or_link.add_image(child.dest, CaptionInfo(None, child.title))
             elif isinstance(child, extended_markdown.LineBreak):
                 pass  # ignore
             elif isinstance(child, extended_markdown.InlineEquation):

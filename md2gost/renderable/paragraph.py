@@ -8,6 +8,7 @@ from docx.enum.text import WD_LINE_SPACING
 from docx.opc.constants import RELATIONSHIP_TYPE
 
 from . import Renderable
+from .caption import CaptionInfo
 from .image import Image
 from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
@@ -68,8 +69,8 @@ class Paragraph(Renderable):
                 self._docx_paragraph.add_run()._element.\
                     append(create_element("w:noBreakHyphen"))
 
-    def add_image(self, path: str):
-        self._images.append(Image(self._parent, path))
+    def add_image(self, path: str, caption_info: CaptionInfo):
+        self._images.append(Image(self._parent, path, caption_info))
 
     def add_link(self, url: str):
         link = Link(url, self._docx_paragraph)

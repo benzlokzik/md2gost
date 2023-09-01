@@ -20,9 +20,10 @@ from ..util import create_element
 
 
 class Image(Renderable, RequiresNumbering):
-    def __init__(self, parent: Parented, path: str):
+    def __init__(self, parent: Parented, path: str, caption_info: CaptionInfo | None = None):
         super().__init__("Рисунок")
         self._parent = parent
+        self._caption_info = caption_info
         self._docx_paragraph = Paragraph(create_element("w:p"), parent)
         self._docx_paragraph.paragraph_format.space_before = 0
         self._docx_paragraph.paragraph_format.space_after = 0
@@ -76,7 +77,7 @@ class Image(Renderable, RequiresNumbering):
 
         layout_state.add_height(rendered_image.height)
 
-        caption = Caption(self._parent, "Рисунок", None, self._number, False)
+        caption = Caption(self._parent, "Рисунок", self._caption_info, self._number, False)
         caption.center()
 
         yield from caption.render(rendered_image, copy(layout_state))
