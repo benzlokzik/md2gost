@@ -11,6 +11,7 @@ from . import Renderable
 from .image import Image
 from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
+from ..sub_renderable import SubRenderable
 from ..util import create_element
 from ..rendered_info import RenderedInfo
 from ..latex_math import latex_to_omml, inline_omml
@@ -110,7 +111,7 @@ class Paragraph(Renderable):
         self._docx_paragraph.paragraph_format.first_line_indent = value
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
-            -> Generator[RenderedInfo | Renderable, None, None]:
+            -> Generator[RenderedInfo | SubRenderable, None, None]:
         remaining_space = layout_state.remaining_page_height
 
         if self.page_break_before:
@@ -162,10 +163,10 @@ class Paragraph(Renderable):
             if rendered_image:
                 previous_rendered = rendered_image[-1]
             if rendered_image_height <= layout_state.remaining_page_height:
-                yield from rendered_image
+                yield SubRenderable(image, False)
                 layout_state.add_height(rendered_image_height)
             else:
-                yield image
+                yield SubRenderable(image, True)
                 break
 
         yield from images

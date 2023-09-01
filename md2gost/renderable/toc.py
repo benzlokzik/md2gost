@@ -10,6 +10,7 @@ from .page_break import PageBreak
 from .renderable import Renderable
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
+from ..sub_renderable import SubRenderable
 from ..util import create_element
 
 
@@ -72,7 +73,7 @@ class ToC(Renderable):
             p.add_run("\n")
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
-            -> Generator[RenderedInfo | Renderable, None, None]:
+            -> Generator[RenderedInfo | SubRenderable, None, None]:
         for rendered_info in self._paragraph.render(previous_rendered, copy(layout_state)):
             yield RenderedInfo(rendered_info.docx_element, 0)
         yield from PageBreak(self._parent).render(None, copy(layout_state))

@@ -6,4 +6,3 @@ from docx.shared import Parented, Length
 class RenderedInfo:
     docx_element: Parented
     height: Length
-    add_to_new_page: bool = False

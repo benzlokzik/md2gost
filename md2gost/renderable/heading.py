@@ -9,6 +9,7 @@ from .paragraph_sizer import ParagraphSizer
 from ..layout_tracker import LayoutState
 from .paragraph import Paragraph
 from ..rendered_info import RenderedInfo
+from ..sub_renderable import SubRenderable
 from ..util import create_element
 
 
@@ -61,7 +62,8 @@ class Heading(Paragraph):
             ])
         )
 
-    def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
+    def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
+            -> Generator[RenderedInfo | SubRenderable, None, None]:
         remaining_height = layout_state.remaining_page_height
 
         if self._level == 1 and layout_state.page != 1 and\

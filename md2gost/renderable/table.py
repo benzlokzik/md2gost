@@ -10,7 +10,7 @@ from .requires_numbering import RequiresNumbering
 from ..docx_elements import *
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
-
+from ..sub_renderable import SubRenderable
 
 CELL_OFFSET = Pt(9) - Twips(108*2)
 
@@ -45,7 +45,7 @@ class Table(Renderable, RequiresNumbering):
         self._number = number
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
-            -> Generator[RenderedInfo | Renderable, None, None]:
+            -> Generator[RenderedInfo | SubRenderable, None, None]:
         caption_rendered_infos = list(
             Caption(self._parent, "Таблица", "", self._number, True)
             .render(previous_rendered, copy(layout_state))

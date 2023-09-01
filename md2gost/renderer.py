@@ -9,6 +9,7 @@ from .numberer import Numberer
 from .renderable import Renderable
 from .renderable.requires_numbering import RequiresNumbering
 from .rendered_info import RenderedInfo
+from .sub_renderable import SubRenderable
 from .util import create_element
 from .layout_tracker import LayoutTracker
 
@@ -68,8 +69,11 @@ class Renderer:
             pass
 
         for info in infos:
-            if isinstance(info, Renderable):
-                self._to_new_page.append(info)
+            if isinstance(info, SubRenderable):
+                if info.add_to_new_page:
+                    self._to_new_page.append(info.renderable)
+                else:
+                    self.render(info.renderable)
             else:
                 self._add(info.docx_element, info.height)
                 self.previous_rendered = info
