@@ -12,13 +12,16 @@ from docx.text.paragraph import Paragraph
 
 from .caption import Caption
 from .renderable import Renderable
+from .requires_numbering import RequiresNumbering
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
 from ..util import create_element
 
 
-class Image(Renderable):
+class Image(Renderable, RequiresNumbering):
     def __init__(self, parent: Parented, path: str):
+        super().__init__("Рисунок")
+        self._parent = parent
         self._docx_paragraph = Paragraph(create_element("w:p"), parent)
         self._docx_paragraph.paragraph_format.space_before = 0
         self._docx_paragraph.paragraph_format.space_after = 0
@@ -40,8 +43,10 @@ class Image(Renderable):
                 logging.warning(f"Invalid image path: {path}, skipping...")
                 self._invalid = True
 
-        self._caption = Caption(parent, "Рисунок", "hello", False)
-        self._caption.center()
+        self._number = None
+
+    def set_number(self, number: int):
+        self._number = number
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
         if self._invalid:
@@ -69,4 +74,7 @@ class Image(Renderable):
 
         layout_state.add_height(rendered_image.height)
 
-        yield from self._caption.render(rendered_image, copy(layout_state))
+        caption = Caption(self._parent, "Рисунок", "", self._number, False)
+        caption.center()
+
+        yield from caption.render(rendered_image, copy(layout_state))

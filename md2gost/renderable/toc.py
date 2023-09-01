@@ -55,7 +55,7 @@ class ToC(Renderable):
     def fill(self):
         p = self._paragraph._docx_paragraph
         p.paragraph_format.tab_stops.add_tab_stop(
-            p.part.document.sections[0].page_width-p.part.document.sections[0].left_margin-p.part.document.sections[0].right_margin,
+            p.part.document.sections[0].page_width - p.part.document.sections[0].left_margin - p.part.document.sections[0].right_margin,
             alignment=WD_TAB_ALIGNMENT.RIGHT, leader=WD_TAB_LEADER.DOTS)
         p.paragraph_format.tab_stops.add_tab_stop(0, alignment=WD_TAB_ALIGNMENT.LEFT, leader=WD_TAB_LEADER.SPACES)
 

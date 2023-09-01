@@ -16,11 +16,13 @@ from .renderable.toc import ToC
 
 
 class RenderableFactory:
+    def __init__(self, parent: Parented):
+        self._parent = parent
+
     @singledispatchmethod
-    @staticmethod
-    def create(marko_element: extended_markdown.BlockElement, parent: Parented) \
-            -> Renderable:
-        paragraph = Paragraph(parent)
+    def create(self, marko_element: extended_markdown.BlockElement,
+               caption: extended_markdown.Caption = None) -> Renderable:
+        paragraph = Paragraph(self._parent)
         paragraph.add_run(f"{marko_element.get_type()} is not supported", color=RGBColor.from_string('ff0000'))
         logging.warning(f"{marko_element.get_type()} is not supported")
         return paragraph
@@ -55,43 +57,36 @@ class RenderableFactory:
                                           color=RGBColor.from_string("FF0000"))
                 logging.warning(f"{child.get_type()} is not supported")
 
+    def _create_caption(self, marko_caption: extended_markdown.Caption, before: bool) -> Caption:
+        return Caption(self._parent, marko_caption.category, marko_caption.text,
+                       before)
+
     @create.register
-    @staticmethod
-    def _(marko_paragraph: extended_markdown.Paragraph, parent: Parented):
-        paragraph = Paragraph(parent)
+    def _(self, marko_paragraph: extended_markdown.Paragraph, caption: extended_markdown.Caption = None):
+        paragraph = Paragraph(self._parent)
         RenderableFactory._create_runs(paragraph, marko_paragraph.children)
         return paragraph
 
     @create.register
-    @staticmethod
-    def _(marko_heading: extended_markdown.Heading, parent: Parented):
-        heading = Heading(parent, marko_heading.level, marko_heading.numbered)
+    def _(self, marko_heading: extended_markdown.Heading, caption: extended_markdown.Caption = None):
+        heading = Heading(self._parent, marko_heading.level, marko_heading.numbered)
         RenderableFactory._create_runs(heading, marko_heading.children)
         return heading
 
     @create.register
-    @staticmethod
-    def _(marko_code_block: extended_markdown.FencedCode | extended_markdown.CodeBlock, parent: Parented):
-        listing = Listing(parent, marko_code_block.lang)
+    def _(self, marko_code_block: extended_markdown.FencedCode | extended_markdown.CodeBlock, caption: extended_markdown.Caption = None):
+        listing = Listing(self._parent, marko_code_block.lang)
         listing.set_text(marko_code_block.children[0].children)
         return listing
 
     @create.register
-    @staticmethod
-    def _(marko_equation: extended_markdown.Equation, parent: Parented):
-        formula = Equation(parent, marko_equation.latex_equation)
+    def _(self, marko_equation: extended_markdown.Equation, caption = None):
+        formula = Equation(self._parent, marko_equation.latex_equation)
         return formula
 
     @create.register
-    @staticmethod
-    def _(marko_caption: extended_markdown.Caption, parent: Parented):
-        caption = Caption(parent, marko_caption.type, marko_caption.text)
-        return caption
-
-    @create.register
-    @staticmethod
-    def _(marko_list: extended_markdown.List, parent: Parented):
-        list_ = List(parent, marko_list.ordered)
+    def _(self, marko_list: extended_markdown.List, caption = None):
+        list_ = List(self._parent, marko_list.ordered)
 
         def create_items_from_marko(marko_list_, level=1):
             for list_item in marko_list_.children:
@@ -109,9 +104,8 @@ class RenderableFactory:
         return list_
 
     @create.register
-    @staticmethod
-    def _(marko_table: extended_markdown.Table, parent: Parented):
-        table = Table(parent, len(marko_table.children), len(marko_table.children[0].children))
+    def _(self, marko_table: extended_markdown.Table, caption: Caption = None):
+        table = Table(self._parent, len(marko_table.children), len(marko_table.children[0].children))
 
         for i, row in enumerate(marko_table.children):
             for j, cell in enumerate(row.children):
@@ -123,7 +117,6 @@ class RenderableFactory:
         return table
 
     @create.register
-    @staticmethod
-    def _(marko_toc: extended_markdown.TOC, parent: Parented):
-        toc = ToC(parent)
+    def _(self, marko_toc: extended_markdown.TOC, caption: extended_markdown.Caption = None):
+        toc = ToC(self._parent)
         return toc

@@ -9,17 +9,22 @@ from md2gost.layout_tracker import LayoutState
 from md2gost.renderable import Renderable
 from md2gost.rendered_info import RenderedInfo
 from .paragraph_sizer import ParagraphSizer
+from .requires_numbering import RequiresNumbering
 from ..util import create_element
 
 
-class Caption(Renderable):
-    def __init__(self, parent: Parented, type_: str, text: str, before=True):
+class Caption(Renderable, RequiresNumbering):
+    def __init__(self, parent: Parented, category: str, text: str, number: int = None, before=True):
+        super().__init__(category)
         self._parent = parent
         self._before = before
         self._docx_paragraph = DocxParagraph(create_element("w:p"), parent)
 
         self._docx_paragraph.style = "Caption"
-        self._docx_paragraph.add_run(f"{type_} ? - {text}")
+        self._docx_paragraph.add_run(f"{category} ")
+        self._numbering_run = self._docx_paragraph.add_run(str(number) if number else "?")
+        if text:
+            self._docx_paragraph.add_run(f" - {text}")
 
     def center(self):
         self._docx_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER

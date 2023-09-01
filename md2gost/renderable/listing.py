@@ -10,15 +10,17 @@ from pygments import highlight
 from pygments.formatter import Formatter
 from pygments.lexers import get_lexer_by_name
 
-
+from .caption import Caption
 from .paragraph import Paragraph
 from .renderable import Renderable
+from .requires_numbering import RequiresNumbering
 from ..docx_elements import create_table
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
 
+
 class DocxParagraphPygmentsFormatter(Formatter):
-    def __init__(self, paragraphs: list[Paragraph], creator: Callable[[],Paragraph], **options):
+    def __init__(self, paragraphs: list[Paragraph], creator: Callable[[], Paragraph], **options):
         Formatter.__init__(self, style="sas", **options)
         self._creator = creator
         self._paragraphs = paragraphs
@@ -43,25 +45,31 @@ class DocxParagraphPygmentsFormatter(Formatter):
         self._paragraphs.pop(-1)  # remove last empty line
 
 
-LISTING_OFFSET = Pt(31) - Twips(108*2)  # todo: fix
+LISTING_OFFSET = Pt(31) - Twips(108 * 2)  # todo: fix
 
 
-class Listing(Renderable):
+class Listing(Renderable, RequiresNumbering):
     def __init__(self, parent, language: str):
+        super().__init__("Листинг")
         self._language = language
-        self.parent = parent
+        self._parent = parent
         self.paragraphs: list[Paragraph] = []
+        self._number = None
 
     def _create_table(self, parent, width: Length):
         # todo: style inheritance
-        left_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
-        right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+        left_margin = Twips(int(
+            parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:left")[0].attrib[
+                "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
+        right_margin = Twips(int(
+            parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib[
+                "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
 
-        return create_table(parent, 1, 1, width+left_margin+right_margin)
+        return create_table(parent, 1, 1, width + left_margin + right_margin)
 
     def set_text(self, text: str):
         def create_paragraph() -> Paragraph:
-            paragraph = Paragraph(self.parent)
+            paragraph = Paragraph(self._parent)
             paragraph.style = "Code"
             return paragraph
 
@@ -76,10 +84,18 @@ class Listing(Renderable):
                 paragraph.add_run(line)
                 self.paragraphs.append(paragraph)
 
-    def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
-        # layout_state.max_width -= Pt(5)
+    def set_number(self, number: int):
+        self._number = number
 
-        table = self._create_table(self.parent, layout_state.max_width)
+    def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[RenderedInfo, None, None]:
+        caption_rendered_infos = list(
+            Caption(self._parent, "Листинг", "", self._number, True)
+            .render(previous_rendered, copy(layout_state))
+        )
+        layout_state.add_height(sum([info.height for info in caption_rendered_infos]))
+        yield from caption_rendered_infos
+
+        table = self._create_table(self._parent, layout_state.max_width)
         previous = None
 
         table_height = Pt(1)  # table borders, 4 eights of point for each border
@@ -103,8 +119,8 @@ class Listing(Renderable):
 
                 table_height = Pt(1)  # table borders, 4 eights of point for each border
 
-                continuation_paragraph = Paragraph(self.parent)
-                continuation_paragraph.add_run("Продолжение листинга")
+                continuation_paragraph = Paragraph(self._parent)
+                continuation_paragraph.add_run(f"Продолжение листинга {self._number}")
                 continuation_paragraph.style = "Caption"
                 continuation_paragraph.first_line_indent = 0
                 continuation_paragraph.page_break_before = True
@@ -115,7 +131,7 @@ class Listing(Renderable):
                 layout_state.add_height(continuation_rendered_info.height)
                 yield continuation_rendered_info
 
-                table = self._create_table(self.parent, layout_state.max_width)
+                table = self._create_table(self._parent, layout_state.max_width)
 
                 previous = None
 

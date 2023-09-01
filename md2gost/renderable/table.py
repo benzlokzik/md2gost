@@ -4,7 +4,9 @@ from typing import Generator
 from docx.shared import Parented, Length, Pt, Twips
 
 from . import Paragraph
+from .caption import Caption
 from .renderable import Renderable
+from .requires_numbering import RequiresNumbering
 from ..docx_elements import *
 from ..layout_tracker import LayoutState
 from ..rendered_info import RenderedInfo
@@ -13,10 +15,12 @@ from ..rendered_info import RenderedInfo
 CELL_OFFSET = Pt(9) - Twips(108*2)
 
 
-class Table(Renderable):
+class Table(Renderable, RequiresNumbering):
     def __init__(self, parent: Parented, rows: int, cols: int):
+        super().__init__("Рисунок")
         self._parent = parent
         self._cols = cols
+
         sect = parent.part.document.sections[0]
 
         # todo: style inheritance
@@ -24,6 +28,7 @@ class Table(Renderable):
         right_margin = Twips(int(parent.part.styles["Normal Table"]._element.xpath("w:tblPr/w:tblCellMar/w:right")[0].attrib["{http://schemas.openxmlformats.org/wordprocessingml/2006/main}w"]))
 
         self._table_width = sect.page_width - sect.left_margin - sect.right_margin + left_margin + right_margin
+        self._number = "?"
 
         self._rows: list[list[list[Paragraph]]] = [[[] for i in range(cols)] for j in range(rows)]
 
@@ -36,8 +41,18 @@ class Table(Renderable):
         self._rows[row][col].append(paragraph)
         return paragraph
 
+    def add_number(self, number):
+        self._number = number
+
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState)\
             -> Generator[RenderedInfo | Renderable, None, None]:
+        caption_rendered_infos = list(
+            Caption(self._parent, "Таблица", "", self._number, True)
+            .render(previous_rendered, copy(layout_state))
+        )
+        layout_state.add_height(sum([info.height for info in caption_rendered_infos]))
+        yield from caption_rendered_infos
+
         docx_table = create_table(self._parent, 0, self._cols, self._table_width)
 
         table_height = Pt(0.5)  # top border

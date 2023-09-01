@@ -8,12 +8,12 @@ class Caption(BlockElement):
 
     Syntax: %Type:label Caption text"""
 
-    pattern = r"\%([^ :]+)(:([^ ]+))? (.+)"
+    pattern = r"\%(Таблица|Листинг|Формула)(:([^ ]*?))?( (.+)|$)"
 
     def __init__(self, match: Match[str]):
-        self.type = match.group(1)
-        self.label = match.group(3)
-        self.text = match.group(4)
+        self.category = match.group(1)
+        self.unique_name = match.group(3)
+        self.text = match.group(5)
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
