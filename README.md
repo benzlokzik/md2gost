@@ -21,7 +21,7 @@ pip install --upgrade git+https://github.com/witelokk/md2gost.git@main
 
 Если ваша система приняла стандарт [PEP 668](https://peps.python.org/pep-0668/), используйте [pipx](https://pypa.github.io/pipx/):
 ```bash
-pipx install --upgrade git+https://github.com/witelokk/md2gost.git@main
+pipx install git+https://github.com/witelokk/md2gost.git@main
 ```
 
 ## Использование
