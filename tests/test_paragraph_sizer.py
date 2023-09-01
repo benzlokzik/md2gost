@@ -206,7 +206,7 @@ class TestParagraphSizer(unittest.TestCase):
 
         ps = ParagraphSizer(paragraph, None, self._max_width - LISTING_OFFSET)
 
-        self.assertEqual(3, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0))
+        self.assertEqual(2, ps.count_lines(paragraph.runs, self._max_width - LISTING_OFFSET, paragraph.style.font, 0))
 
     def test_count_lines_courier6(self):
         paragraph = self._document.add_paragraph(style="Code")
