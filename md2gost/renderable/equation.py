@@ -5,6 +5,7 @@ from docx.oxml import CT_Tbl
 from docx.shared import Pt, Twips
 from docx.table import Table
 
+from .requires_numbering import RequiresNumbering
 from ..layout_tracker import LayoutState
 from ..renderable import Renderable
 from ..rendered_info import RenderedInfo
@@ -15,8 +16,9 @@ from ..latex_math import latex_to_omml
 _HEIGHT = Pt(50)
 
 
-class Equation(Renderable):
+class Equation(Renderable, RequiresNumbering):
     def __init__(self, parent, latex_formula: str):
+        super().__init__("Формула")
         word_math = latex_to_omml(latex_formula)
 
         sect = parent.part.document.sections[0]
@@ -53,6 +55,9 @@ class Equation(Renderable):
         right_paragraph._p.append(create_element("w:r", ")"))
         right_cell.vertical_alignment = \
             WD_CELL_VERTICAL_ALIGNMENT.CENTER
+
+    def set_number(self, number: int):
+        self._numbering_run.text = str(number)
 
     def render(self, previous_rendered: RenderedInfo, layout_state: LayoutState) -> Generator[
             "RenderedInfo | Renderable", None, None]:
