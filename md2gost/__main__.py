@@ -1,82 +1,64 @@
 #!/bin/python
-from argparse import ArgumentParser, BooleanOptionalAction
+import click
 import os.path
-from getpass import getuser
+import sys
 
-from docxcompose.composer import Composer
-from docx import Document
-
-from .converter import Converter
+from . import __version__
 
 
-def main():
-    parser = ArgumentParser(
-        prog="md2docx",
-        description="Этот скрипт предназначен для генерирования отчетов/\
-                курсовых работ по ГОСТ в формате docx из Markdown-файла."
-    )
-    parser.add_argument("filename", help="Путь до исходного markdown файла")
-    parser.add_argument("-o", "--output", help="Путь до сгенерированного \
-                            файла")
-    parser.add_argument("-t", "--template", help="Путь до шаблона .docx")
-    # parser.add_argument("-T", "--title", help="Путь до файла титульной(-ых) \
-    #                         страниц(ы)")
-    parser.add_argument("--syntax-highlighting", help="Подсветка синтаксиса в листингах",
-                        action=BooleanOptionalAction)
-    parser.add_argument("--debug", help="Добавляет отладочные данные в документ",
-                        action="store_true")
+class DeprecatedOption(click.Option):
+    def __init__(self, *args, **kwargs):
+        self.deprecated = kwargs.pop('deprecated', ())
+        self.preferred = kwargs.pop('preferred', args[0][-1])
+        super(DeprecatedOption, self).__init__(*args, **kwargs)
 
-    args = parser.parse_args()
-    filename, output, template, debug = \
-        args.filename, args.output, args.template, args.debug
-    if args.syntax_highlighting:
-        os.environ["SYNTAX_HIGHLIGHTING"] = "1"
 
-    if not filename.endswith(".md"):
-        print("Error: filename must have md format")
-        exit(1)
+@click.command
+@click.argument("filenames", nargs=-1)
+@click.option("-o", "--output", help="Путь до сгенерированного файла")
+@click.option("-t", "--template", help="Путь до шаблона в формате docx")
+@click.option("-T", "--title", help="Путь до титульника в формате docx")
+@click.option("-f", "--first-page", help="Номер первой страницы", default=1)
+@click.option("-s", "--syntax-highlighting", help="Подсветка синтаксиса в листингах", is_flag=True)
+@click.option("--title-pages", hidden=True)
+@click.option("-d", "--debug", is_flag=True, hidden=True)
+@click.version_option(__version__, "--version", "-v")
+@click.help_option("-h", "--help")
+def main(filenames: tuple[str, ...], output: str, template: str, title: str, first_page: int,
+         syntax_highlighting: bool, debug: bool, title_pages: str):
+    # deprecated options
+    if title_pages:
+        print("Параметр --title-pages устарел. Используйте --first-page.", file=sys.stderr)
+        sys.exit(1)
 
-    os.environ["WORKING_DIR"] = os.path.dirname(filename)
+    from .converter import Converter
 
-    if output:
-        if not output.endswith(".docx"):
-            print("Error: output must have docx format")
-            exit(2)
-    else:
-        output = os.path.basename(filename).replace(".md", ".docx")
+    if not filenames:
+        print("Нет входных файлов!")
+        return -1
+
+    if not output:
+        output = os.path.basename(filenames[0]).replace(".md", ".docx")
 
     if not template:
         template = os.path.join(os.path.dirname(__file__), "Template.docx")
 
-    converter = Converter(filename, output, template, debug)
-    converter.convert()
+    converter = Converter(template, title, first_page, debug, syntax_highlighting)
+    converter.convert(filenames, output)
 
-    document = converter.document
-
-    # if title:
-    #     title = Document(title)
-    #     title.add_page_break()
-    #     composer = Composer(title)
-    #     composer.append(document)
-    #     document = composer.doc
-
-    document.core_properties.author = getuser()
-    document.core_properties.comments =\
-        "Создано при помощи https://github.com/witelokk/md2gost"
-
-    document.save(output)
-    print(f"Generated document: {os.path.abspath(output)}")
+    print(f"Сгенерированный документ: {os.path.abspath(output)}")
 
     if debug:
         import platform
         if platform.system() == 'Darwin':       # macOS
             import subprocess
             subprocess.call(('open', output))
-        elif platform.system() == 'Windows':    # Windows
+        elif platform.system() == 'Windows':    # windows
             os.startfile(output)
         else:                                   # linux variants
             import subprocess
             subprocess.call(('xdg-open', output))
 
+
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

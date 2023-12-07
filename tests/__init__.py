@@ -26,7 +26,8 @@ def _create_test_document():
     document.styles["Code"].font.name = "Courier New"
     document.styles["Code"].font.size = Pt(12)
 
-    max_height = Mm(297) - Cm(2) - Cm(2)
-    max_width = Mm(210) - Cm(2.5) - Cm(1)
+    max_height, max_width = (9302440, 6299835)
+    # ↑ these are values that python-docx reports for a A4 document,
+    # they are a bit larger than they should be
 
     return document, max_height, max_width

@@ -3,8 +3,7 @@ from docx.oxml.ns import qn
 from lxml.etree import _Element
 
 
-def create_element(name: str, *args: dict[str, str] | list[_Element] | str)\
-        -> _Element:
+def create_oxml_element(name: str, *args: dict[str, str] | list[_Element] | str):
     """Creates an OxmlElement
 
     Variable arguments:
